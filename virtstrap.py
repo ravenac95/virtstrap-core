@@ -40,7 +40,7 @@ DEFAULT_SETTINGS_FILENAME = "vsettings.json"
 DEFAULT_SETTINGS = dict(
     package_name="",
     use_site_packages=False,
-    virtualenv_dir="./.env/",
+    virtualenv_dir="./env/",
     env_types=[], #Possible values command_list, pip, buildout
     # buildout bootstrap url so it can be downloaded. 
     # It's long so it was split into two lines (if that wasn't obvious)
