@@ -1,0 +1,6 @@
+{
+    "package_name": "virtbootstrap",
+    "env_types": ["pip", "buildout", "shell_script"],
+    "shell_script_file": "test.sh",
+    "pip_requirements_file": "requirements.txt"
+}
