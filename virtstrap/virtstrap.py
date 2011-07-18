@@ -40,10 +40,11 @@ DEFAULT_SETTINGS_FILENAME = "vsettings.json"
 DEFAULT_SETTINGS = dict(
     package_name="",
     use_site_packages=False,
-    virtualenv_dir="./env/",
+    virtualenv_dir="./vs.env/",
     env_types=[], #Possible values command_list, pip, buildout
     # buildout bootstrap url so it can be downloaded. 
     # It's long so it was split into two lines (if that wasn't obvious)
+    buildout_bin_path="bin/",
     buildout_bootstrap_url=("http://svn.zope.org/*checkout*/" 
         "zc.buildout/trunk/bootstrap/bootstrap.py"),
 )
@@ -212,10 +213,16 @@ def buildout_builder(**kwargs):
     # Get virtualenv interpreter to use for bootstrapping
     virtualenv_dir_abspath = get_virtualenv_dir_abspath()
     virtualenv_python_bin = os.path.join(virtualenv_dir_abspath, "bin/python")
+    # Get path to buildout executable or go to default buildout setting
+    buildout_bin_path = settings.get('buildout_bin_path')
+    buildout_executable = os.path.join(buildout_bin_path, "buildout")
     if buildout_cfg_found:
-        if not os.path.isfile("./bin/buildout"):
+        if not os.path.isfile(buildout_executable):
             call([virtualenv_python_bin, bootstrap_py])
-        call(["./bin/buildout",  "-c", buildout_cfg])
+        if not os.path.isfile(buildout_executable):
+            print "Cannot find buildout executable"
+            exit_with_error()
+        call([buildout_executable,  "-c", buildout_cfg])
 
 ##########################################
 # Script Commands                        #
