@@ -99,15 +99,15 @@ in the root of your project. virtstrap will automatically download
 Configuration Options
 ---------------------
 
-* ``package_name`` - Required. - The desired package name. 
-    Letters, Numbers, Underscores only
-* ``use_site_packages`` - Default: false - Tells virtualenv whether or 
-    not to use site packages
-* ``virtualenv_dir`` - Default ``"./vs.env/"`` - Tells virtstrap where to
-    place the virtual environment
-* ``env_types`` - Default [] - An array with any combination of 
-    possible values "pip" or "buildout". See more in the Environment Types
-    section above.
-* ``pip_requirements_file`` - Required if env_types contains "pip". -
+* ``package_name`` - Required 
+    The desired package name. Letters, Numbers, Underscores only
+* ``use_site_packages`` - Default: ``false`` 
+    Tells virtualenv whether or not to use site packages.
+* ``virtualenv_dir`` - Default ``"./vs.env/"`` 
+    Tells virtstrap where to place the virtual environment
+* ``env_types`` - Default []
+    An array with any combination of possible values "pip" or "buildout". 
+    See more in the Environment Types section above.
+* ``pip_requirements_file`` - Required if env_types contains "pip"
     Path to pip requirements file for this project.
 
