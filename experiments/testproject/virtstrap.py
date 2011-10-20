@@ -17,6 +17,7 @@ import ConfigParser
 from subprocess import call
 import json
 import os, sys
+import imp
 import platform
 import urllib
 
@@ -40,6 +41,9 @@ DEFAULT_CONFIG_FILENAME = "conf/proj.cfg"
 
 DEFAULT_PACKAGE_SETTINGS = dict(
     name="",
+    dir="",
+    config_dir="conf",
+    conf_module_base="virtstrapconf",
     use_site_packages=False,
     virtualenv_dir="./vs.env/",
 )
@@ -60,6 +64,7 @@ def yes_no_input(prompt, default=True):
                 result = True
             else:
                 result = False
+            break
     return result
 
 def raw_input_with_default(prompt, default_input_string="['']"):
@@ -78,6 +83,20 @@ def exit_normally():
     sys.exit(EXIT_NORMALLY)
 
 ##########################################
+# CommentlessFile                        #
+##########################################
+
+class CommentlessFile(file):
+    def readline(self):
+        line = super(CommentlessFile, self).readline()
+        if line:
+            line = line.split('#', 1)[0].rstrip()
+            line = line.split(';', 1)[0].rstrip()
+            return line + '\n'
+        else:
+            return ''
+
+##########################################
 # Utility functions                      #
 ##########################################
 def in_virtualenv():
@@ -85,18 +104,22 @@ def in_virtualenv():
         return True
     return False
 
+def ask_to_skip():
+    if not options.interactive:
+        exit_with_error()
+    else:
+        if yes_no_input("Skip?"):
+            print "Skipping."
+        else:
+            exit_with_error()
+
+
 def find_file_or_skip(file, not_found_string="'{0}' not found."):
     file_found = True
     if not os.path.isfile(file):
         file_found = False
         print not_found_string.format(file)
-        if options.interactive:
-            exit_with_error()
-        else:
-            if yes_no_input("Skip?"):
-                print "Skipping."
-            else:
-                exit_with_error()
+        ask_to_skip()
     return file_found
 
 def find_all_files_or_skip(files, not_found_string="Files not found."):
@@ -104,13 +127,7 @@ def find_all_files_or_skip(files, not_found_string="Files not found."):
     if not all_files_exist(files):
         files_found = False
         print not_found_string
-        if not options.interactive:
-            exit_with_error()
-        else:
-            if yes_no_input("Skip?"):
-                print "Skipping."
-            else:
-                exit_with_error()
+        ask_to_skip()
     return files_found
 
 def all_files_exist(files):
@@ -125,10 +142,10 @@ def get_virtualenv_dir_abspath():
 def make_current_settings(settings_filename, default_settings=None):
     # set default_settings
     if not default_settings:
-        default_settings = DEFAULT_SETTINGS
+        default_settings = DEFAULT_PACKAGE_SETTINGS
     # Try opening the settings file
     try:
-        settings_file = open(settings_filename)
+        settings_file = CommentlessFile(settings_filename)
     except IOError:
         #If file isn't found tell the user and exit with error
         print ("A settings file is required. Could not find {0}"
@@ -197,14 +214,23 @@ def pip_requirements_installer(requirements_files):
             pip_command = "install"
             call([pip_bin, pip_command, "-r", requirements_file])
 
-def commands_installer(commands):
-    try:
-        shell_script_file = settings['shell_script_file']
-    except KeyError:
-        print "Shell Script env_type requires a setting 'command_list_file'"
-        exit_with_error()
-    if find_file_or_skip(shell_script_file):
-        call(["sh", shell_script_file])
+def scripts_installer(scripts):
+    config_directory = settings['config_dir']
+    conf_module_base = settings['conf_module_base']
+    #execute scripts
+    for script in scripts:
+        #execute script
+        script_path = os.path.join(config_directory, script)
+        script_module_name = script.split(".")[0]
+        conf_module_path = "_".join([conf_module_base, script_module_name])
+        try:
+            script_module = imp.load_source(conf_module_path, script_path)
+        except ImportError:
+            print 'Script at "{0}" not found'.format(script_path)
+            ask_to_skip()
+        else:
+            script_module.script_run(settings)
+        
 
 ##########################################
 # Script Commands                        #
@@ -251,6 +277,10 @@ def quick_activation_script(virtualenv_dir, file="quickactivate.sh",
 
 def run_build():
     """Build the project based on the installation settings"""
+    old_path = os.environ['PATH']
+    virtualenv_dir = settings['virtualenv_dir']
+    virtualenv_bin_path = os.path.abspath(os.path.join(virtualenv_dir, "bin"))
+    os.environ['PATH'] = "{0}:{1}".format(virtualenv_bin_path, old_path)
     for setting_name, setting_raw_value in install_settings.iteritems():
         # Turn lines of settings values into an array of settings
         setting_values = setting_raw_value.splitlines() 
@@ -258,14 +288,9 @@ def run_build():
         installer = INSTALLERS.get(setting_name)
         if not installer:
             print "Install config key '{0}' is unknown".format(setting_name)
-            if not options.interactive:
-                exit_with_error()
-            else:
-                if yes_no_input("Skip?"):
-                    print "Skipping."
-                else:
-                    exit_with_error()
+            ask_to_skip()
         installer(setting_values)
+    os.environ['PATH'] = old_path
 
 ##########################################
 # Program settings                       #
@@ -278,8 +303,8 @@ VIRTSTRAP_COMMANDS = dict(
 
 INSTALLERS = dict(
     requirements=pip_requirements_installer,
-    commands=commands_installer,
-    environment=enviroment_installer
+    scripts=scripts_installer,
+    #environment=enviroment_installer
 )
 
 parser = OptionParser()
