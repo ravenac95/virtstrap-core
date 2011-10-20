@@ -1,0 +1,2 @@
+WHATTHE="FUDGE"
+export WHATTHE

@@ -36,7 +36,7 @@ if platform.system() == "Windows":
 EXIT_WITH_ERROR = 1
 EXIT_NORMALLY = 0
 VIRTUALENV_PROMPT_TEMPLATE = "({0}env) "
-DEFAULT_SETTINGS_FILENAME = "conf/env.cfg"
+DEFAULT_CONFIG_FILENAME = "conf/proj.cfg"
 
 DEFAULT_PACKAGE_SETTINGS = dict(
     name="",
@@ -123,46 +123,6 @@ def get_virtualenv_dir_abspath():
     return os.path.abspath(settings['virtualenv_dir'])
 
 def make_current_settings(settings_filename, default_settings=None):
-    """Compile settings from default and user"""
-    # Set default settings
-    if not default_settings:
-        default_settings = DEFAULT_SETTINGS
-    # Try opening the settings file
-    try:
-        settings_file = open(settings_filename)
-    except IOError:
-        #If file isn't found tell the user and exit with error
-        print ("A settings file is required. Could not find {0}"
-                .format(settings_filename))
-        exit_with_error()
-    # Load json from file. (The file, currently, must be json)
-    user_defined_settings = json.load(settings_file)
-
-    # Build settings keys
-    settings_keys = user_defined_settings.keys()
-
-    # Copy defaults into a new settings dictionary
-    current_settings = default_settings.copy()
-
-    # Check that a package name is defined
-    package_name = user_defined_settings.get('package_name')
-    if not package_name:
-        #If there isn't a package name then tell user and exit with error
-        print "At least a package name is required for virtstrap.py"
-        exit_with_error()
-    
-    # There are some built in defaults
-
-    # Create the default virtualenv prompt using the package name
-    prompt = VIRTUALENV_PROMPT_TEMPLATE.format(package_name)
-    current_settings['prompt'] = prompt
-
-    # Add the user defined settings to the new settings dictionary
-    for key in settings_keys:
-        current_settings[key] = user_defined_settings[key]
-    return current_settings
-
-def make_current_settings(settings_filename, default_settings=None):
     # set default_settings
     if not default_settings:
         default_settings = DEFAULT_SETTINGS
@@ -210,29 +170,34 @@ def make_current_settings(settings_filename, default_settings=None):
                 profile = "default"
             install_section_dict = dict(config.items(section))
             installation_profiles[profile] = install_section_dict
+    
+    selected_install_profile = options.install_profile
+    install_settings = installation_profiles.get(
+            selected_install_profile)
 
-    return current_settings, installation_profiles
+    if not install_settings:
+        print "{0} is not a defined installation_profile.".format(
+                selected_install_profile)
+        exit_with_error()
+
+    return current_settings, install_settings
     
 ##########################################
-# Environment type commands              #
+# Installer commands                     #
 ##########################################
 
-def pip_requirements_builder(**kwargs):
+def pip_requirements_installer(requirements_files):
     """Builds pip requirements"""
     virtualenv_dir_abspath = get_virtualenv_dir_abspath()
-    try:
-        pip_requirements_file = settings['pip_requirements_file']
-    except KeyError:
-        print "Pip env_type requires setting 'pip_requirements_file'"
-        exit_with_error()
     
-    if find_file_or_skip(pip_requirements_file):
-        pip_bin = "{0}/bin/pip".format(
-                virtualenv_dir_abspath)
-        pip_command = "install"
-        call([pip_bin, "install", "-r", pip_requirements_file])
+    for requirements_file in requirements_files:
+        if find_file_or_skip(requirements_file):
+            pip_bin = "{0}/bin/pip".format(
+                    virtualenv_dir_abspath)
+            pip_command = "install"
+            call([pip_bin, pip_command, "-r", requirements_file])
 
-def shell_script_executor(**kwargs):
+def commands_installer(commands):
     try:
         shell_script_file = settings['shell_script_file']
     except KeyError:
@@ -240,35 +205,6 @@ def shell_script_executor(**kwargs):
         exit_with_error()
     if find_file_or_skip(shell_script_file):
         call(["sh", shell_script_file])
-
-def buildout_builder(**kwargs):
-    bootstrap_py = "bootstrap.py"
-
-    buildout_cfg = settings.get('buildout_config_file', 'buildout.cfg')
-    buildout_cfg_found = find_file_or_skip(buildout_cfg, 
-            not_found_string=("Buildout needs the specified buildout config "
-                "file ({0}) present"))
-    
-    # Download bootstrap.py
-    if not os.path.isfile(bootstrap_py):
-        urllib.urlretrieve(settings['buildout_bootstrap_url'], bootstrap_py)
-    if not os.path.isfile(bootstrap_py):
-        print "Error Downloading {0}".format(bootstrap_py)
-        exit_with_error()
-    
-    # Get virtualenv interpreter to use for bootstrapping
-    virtualenv_dir_abspath = get_virtualenv_dir_abspath()
-    virtualenv_python_bin = os.path.join(virtualenv_dir_abspath, "bin/python")
-    # Get path to buildout executable or go to default buildout setting
-    buildout_bin_path = settings.get('buildout_bin_path')
-    buildout_executable = os.path.join(buildout_bin_path, "buildout")
-    if buildout_cfg_found:
-        if not os.path.isfile(buildout_executable):
-            call([virtualenv_python_bin, bootstrap_py])
-        if not os.path.isfile(buildout_executable):
-            print "Cannot find buildout executable"
-            exit_with_error()
-        call([buildout_executable,  "-c", buildout_cfg])
 
 ##########################################
 # Script Commands                        #
@@ -314,12 +250,14 @@ def quick_activation_script(virtualenv_dir, file="quickactivate.sh",
     quick_activate_file.close()
 
 def run_build():
-    """Build the project based on the env_types"""
-    env_types = settings['env_types']
-    for env_type in env_types:
-        builder = ENVIRONMENT_TYPE_BUILDERS.get(env_type)
-        if not builder:
-            print "env_type: {0}. Does not exist".format(env_type)
+    """Build the project based on the installation settings"""
+    for setting_name, setting_raw_value in install_settings.iteritems():
+        # Turn lines of settings values into an array of settings
+        setting_values = setting_raw_value.splitlines() 
+        # Grab the appropriate installer
+        installer = INSTALLERS.get(setting_name)
+        if not installer:
+            print "Install config key '{0}' is unknown".format(setting_name)
             if not options.interactive:
                 exit_with_error()
             else:
@@ -327,7 +265,7 @@ def run_build():
                     print "Skipping."
                 else:
                     exit_with_error()
-        builder()
+        installer(setting_values)
 
 ##########################################
 # Program settings                       #
@@ -338,19 +276,22 @@ VIRTSTRAP_COMMANDS = dict(
     build=run_build
 )
 
-ENVIRONMENT_TYPE_BUILDERS = dict(
-    pip=pip_requirements_builder,
-    shell_script=shell_script_executor,
-    buildout=buildout_builder,
+INSTALLERS = dict(
+    requirements=pip_requirements_installer,
+    commands=commands_installer,
+    environment=enviroment_installer
 )
 
 parser = OptionParser()
 parser.add_option("-n", "--no-build", dest="no_build",
         help="Only setup virtual environment")
-parser.add_option("-s", "--install-settings", dest="install_settings",
-        help=("The settings JSON file defaults to {0}"
-            .format(DEFAULT_SETTINGS_FILENAME)), 
-        default=DEFAULT_SETTINGS_FILENAME)
+parser.add_option("-c", "--config", dest="config",
+        help=("Install config defaults to {0}"
+            .format(DEFAULT_CONFIG_FILENAME)), 
+        default=DEFAULT_CONFIG_FILENAME)
+parser.add_option("-p", "--install-profile", dest="install_profile",
+        help=("Install profile defaults to default"), 
+        default="default")
 parser.add_option("-i", "--interactive", dest="interactive",
         help="Turns on interactivity", 
         default=False)
@@ -358,6 +299,7 @@ parser.add_option("-i", "--interactive", dest="interactive",
 options, args = parser.parse_args() #Global options and args
 
 settings = None # Global settings for the script
+install_settings = None # Global installation profiles
 
 ##########################################
 # Main                                   #
@@ -369,12 +311,14 @@ def main():
     else:
         # Otherwise use the first argument as the command
         command_name = args[0]
-    # Compile settings into global settings variable
-    global settings
-    settings = make_current_settings(options.install_settings)
+    # Compile settings and installation_profiles into global settings variable
+    global settings, install_settings
+    settings, install_settings = make_current_settings(
+            options.config)
 
     # Choose virtstrap command from dictionary of commands
     virtstrap_command = VIRTSTRAP_COMMANDS.get(command_name)
+
     # If the virtstrap command doesn't exist then exit with error
     if not virtstrap_command:
         print "'{0}' is not a valid command".format(command_name)
