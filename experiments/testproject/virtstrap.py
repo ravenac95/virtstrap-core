@@ -46,6 +46,8 @@ DEFAULT_PACKAGE_SETTINGS = dict(
     conf_module_base="virtstrapconf",
     use_site_packages=False,
     virtualenv_dir="./vs.env/",
+    virtstrap_base_url=
+        "https://raw.github.com/ravenac95/virtstrap/master/virtstrap/",
 )
 
 ##########################################
@@ -97,6 +99,18 @@ class CommentlessFile(file):
             return ''
 
 ##########################################
+# Utility classes                        #
+##########################################
+
+#Create a download utility
+class HTTPError(Exception):
+    pass
+
+class VSURLOpener(urllib.FancyURLopener):
+    def http_error_default(self, url, fp, errcode, errmsg, headers):
+        raise HTTPError("{0} Error. {1}".format(errcode, errmsg))
+
+##########################################
 # Utility functions                      #
 ##########################################
 def in_virtualenv():
@@ -138,6 +152,9 @@ def all_files_exist(files):
 
 def get_virtualenv_dir_abspath():
     return os.path.abspath(settings['virtualenv_dir'])
+
+def download_file():
+    urlopener = VSURLOpener()
 
 def make_current_settings(settings_filename, default_settings=None):
     # set default_settings
@@ -239,7 +256,12 @@ def scripts_installer(scripts):
 def bootstrap():
     """The default command for this script"""
     create_virtualenv()
+    download_resources()
     run_build()
+
+def download_resources():
+    #Download virtstrap resources
+    files_to_download = ('env.py', 'templates/quickactivate.sh')
 
 def create_virtualenv():
     """Create the virtual environment"""
@@ -262,17 +284,44 @@ def create_virtualenv():
             site_packages=settings['use_site_packages'], 
             prompt=settings['prompt'])
     # Create activation script
-    print "Create quickactivate.sh script for virtualenv"
+    print "Creating quickactivate.sh script for virtualenv"
     quick_activation_script(virtualenv_dir_abspath)
 
+
+QUICK_ACTIVATION_SCRIPT_TEMPLATE = """
+#!/bin/bash
+source {virtualenv_dir}/bin/activate
+
+# Save the deactivate function from virtualenv under a different name
+virtualenvwrapper_original_deactivate=`typeset -f deactivate | sed 's/deactivate/virtualenv_deactivate/g'`
+eval "$virtualenvwrapper_original_deactivate"
+unset -f deactivate >/dev/null 2>&1
+
+#eval `python {virtualenv_dir}/hooks/env.py {environment_script}`
+
+deactivate () {
+    virtualenv_deactivate $1
+
+    #deactivate_custom_env $1
+
+    if [ ! "$1" = "nondestructive" ]
+    then
+        # Remove this function
+        unset -f virtualenv_deactivate >/dev/null 2>&1
+        unset -f deactivate >/dev/null 2>&1
+    fi
+}
+
+"""
 
 def quick_activation_script(virtualenv_dir, file="quickactivate.sh", 
         base_path='./'):
     """Builds a virtualenv activation script shortcut"""
     quick_activate_filename = os.path.join(base_path, file)
     quick_activate_file = open(quick_activate_filename, 'w')
-    quick_activate_file.writelines(["#!/bin/bash\n", 
+    quick_activate_file.write(["#!/bin/bash\n", 
         "source {0}/bin/activate".format(virtualenv_dir)])
+    #Hook into virtualenv's deactivate
     quick_activate_file.close()
 
 def run_build():
