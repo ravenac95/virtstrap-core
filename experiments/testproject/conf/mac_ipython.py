@@ -4,5 +4,5 @@ import platform
 
 def script_run(settings):
     if platform.system().startswith("Darwin"):
-        print "Installing Mac specific fix for ipython"
+        print "Installing Mac OS X specific readline fix for ipython"
         call(["easy_install", "-a", "readline"])

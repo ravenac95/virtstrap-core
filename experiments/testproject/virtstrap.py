@@ -38,6 +38,7 @@ EXIT_WITH_ERROR = 1
 EXIT_NORMALLY = 0
 VIRTUALENV_PROMPT_TEMPLATE = "({0}env) "
 DEFAULT_CONFIG_FILENAME = "conf/proj.cfg"
+MAX_DOWNLOAD_RETRIES = 3
 
 DEFAULT_PACKAGE_SETTINGS = dict(
     name="",
@@ -104,11 +105,17 @@ class CommentlessFile(file):
 
 #Create a download utility
 class HTTPError(Exception):
-    pass
+    def __init__(self, url, fp, error_code, error_msg, headers):
+        self.url = url
+        self.fp = fp
+        self.error_code = error_code
+        self.error_msg = error_msg
+        self.headers = headers
 
 class VSURLOpener(urllib.FancyURLopener):
-    def http_error_default(self, url, fp, errcode, errmsg, headers):
-        raise HTTPError("{0} Error. {1}".format(errcode, errmsg))
+    def http_error_default(self, url, fp, error_code, 
+            error_msg, headers):
+        raise HTTPError(url, fp, error_code, error_msg, headers)
 
 ##########################################
 # Utility functions                      #
@@ -126,7 +133,6 @@ def ask_to_skip():
             print "Skipping."
         else:
             exit_with_error()
-
 
 def find_file_or_skip(file, not_found_string="'{0}' not found."):
     file_found = True
@@ -153,8 +159,38 @@ def all_files_exist(files):
 def get_virtualenv_dir_abspath():
     return os.path.abspath(settings['virtualenv_dir'])
 
-def download_file():
+def resource_local_path(file_path):
+    virtstrap_resource_dir = settings['virtstrap_resource_dir']
+    return os.path.join(virtstrap_resource_dir, file_path)
+
+def resource_remote_url(file_path):
+    base_url = settings['virtstrap_base_url']
+    return os.path.join(base_url, file_path)
+
+def download_file(url, destination, skip_allowed=False):
     urlopener = VSURLOpener()
+    retries = 0
+    while retries < MAX_DOWNLOAD_RETRIES:
+        try:
+            urlopener.retrieve(url, destination)
+        except HTTPError, e:
+            print e.error_code
+        else:
+            break
+        retries += 1
+        if retries < MAX_DOWNLOAD_RETRIES:
+            print "Retrying"
+    print "Failed to download {0}".format(url)
+    if skip_allowed:
+        ask_to_skip()
+    else:
+        exit_with_error()
+
+def download_resource_file(file_path):
+    url = resource_remote_url(file_path)
+    destination = resource_local_path(file_path)
+    print 'Downloading resource "{0}"'.format(file_path)
+    download_file(url, destination)
 
 def make_current_settings(settings_filename, default_settings=None):
     # set default_settings
@@ -191,6 +227,11 @@ def make_current_settings(settings_filename, default_settings=None):
     # Create the default virtualenv prompt using the package name
     prompt = VIRTUALENV_PROMPT_TEMPLATE.format(package_name)
     current_settings['prompt'] = prompt
+   
+    # Create setting for virtstrap resource directory
+    virtstrap_resource_dir = os.path.join(get_virtualenv_dir_abspath(),
+            "virtstrap")
+    current_settings['virtstrap_resource_dir']
 
     # Collect the installation sections
     all_sections = config.sections()
@@ -256,7 +297,6 @@ def scripts_installer(scripts):
 def bootstrap():
     """The default command for this script"""
     create_virtualenv()
-    download_resources()
     run_build()
 
 def download_resources():
@@ -284,6 +324,11 @@ def create_virtualenv():
             site_packages=settings['use_site_packages'], 
             prompt=settings['prompt'])
     # Create activation script
+    activate_template = "quickactivate.sh.tmpl"
+    # Download template if necessary
+    if not all_files_exist([resource_local_path(activate_template)]):
+        download_resource_file(activate_template)
+    # Build the file from the template
     print "Creating quickactivate.sh script for virtualenv"
     quick_activation_script(virtualenv_dir_abspath)
 
@@ -311,7 +356,6 @@ deactivate () {
         unset -f deactivate >/dev/null 2>&1
     fi
 }
-
 """
 
 def quick_activation_script(virtualenv_dir, file="quickactivate.sh", 
@@ -319,7 +363,7 @@ def quick_activation_script(virtualenv_dir, file="quickactivate.sh",
     """Builds a virtualenv activation script shortcut"""
     quick_activate_filename = os.path.join(base_path, file)
     quick_activate_file = open(quick_activate_filename, 'w')
-    quick_activate_file.write(["#!/bin/bash\n", 
+    quick_activate_file.writelines(["#!/bin/bash\n", 
         "source {0}/bin/activate".format(virtualenv_dir)])
     #Hook into virtualenv's deactivate
     quick_activate_file.close()
