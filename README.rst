@@ -18,16 +18,23 @@ For those of you who have not experienced it, ipython does not work well
 with Leopard's version of libedit. However, installing readline via
 ``easy_install`` is the only way to get it to work (oddly enough it won't
 work through a pip installation). So this forced me to come up with a 
-solution that would solve this problem.
+solution that would solve my problem with both buildout and virtualenv+pip.
 
 The result is virtstrap.
 
 Is this yet another build tool?
 -------------------------------
 
-Yes and no. Virtstrap is not meant to replace pip, virtualenv, or buildout. 
-It simply puts all of those tools together so they can work in a friendly
-way.
+Yes and no. Virtstrap is meant as a layer above virtualenv+pip to give
+the user buildout like capabilities without all the buildout overhead (i hope).
+
+Why not virtualenv-wrapper?
+---------------------------
+
+I looked into using it but it did not fit my particular needs. It's a great
+tool but I wanted to create a tool that didn't have to be installed system 
+wide to see use. Granted, it is easier when it is installed system wide, but
+I believe it's still usable without install virtstrap on the system.
 
 virtstrap Quick Start Guide
 ---------------------------
@@ -68,46 +75,18 @@ To get started with the virtual environment simply type:
 
 ``source quickactivate.sh``
 
+You should see ``(yourprojectnameenv)`` preceding your bash shell prompt.
 Now you've got a whole project ready to go with virtstrap.
-
-Doing more with virtstrap
--------------------------
-
-Although convenient, the quick start guide doesn't really show 
-you the true power of virtstrap. The best way to use virtstrap 
-is with pip and/or buildout. If you configure virtstrap to use
-either pip or buildout, virtstrap will automatically execute both 
-builds. This allows you to have a completely repeatable project
-with all the convenience of using pip or easy_install. 
-
-Environment Types (this is how you make magic happen) 
------------------------------------------------------
-
-An environment type in virtstrap is any method you'd like to use to
-build your environment. Currently the options are to use pip or buildout. 
-To use these environment types you add "pip" or "buildout" 
-to env_types in the vsettings.json. More is explained in the configurations
-section below.
-
-Notes on using buildout
------------------------
-
-If you use buildout, the only requirement is to create a ``buildout.cfg`` file
-in the root of your project. virtstrap will automatically download 
-``bootstrap.py`` which is necessary for buildout. 
 
 Configuration Options
 ---------------------
 
-* ``package_name`` - Required 
-    The desired package name. Letters, Numbers, Underscores only
-* ``use_site_packages`` - Default: ``false`` 
-    Tells virtualenv whether or not to use site packages.
-* ``virtualenv_dir`` - Default ``"./vs.env/"`` 
-    Tells virtstrap where to place the virtual environment
-* ``env_types`` - Default []
-    An array with any combination of possible values "pip" or "buildout". 
-    See more in the Environment Types section above.
-* ``pip_requirements_file`` - Required if env_types contains "pip"
-    Path to pip requirements file for this project.
+The configuration for a virtstrap project is located, by default, in
+``[PROJECT_ROOT_DIR]/conf/proj.conf``. Virtstrap uses python's ConfigParser.
+Therefore the configuration options look much like an ``ini`` file.
+
+The most basic configuration looks like this::
+
+    [project]
+    name = project-name-here # This must have no spaces
 

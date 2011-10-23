@@ -40,7 +40,7 @@ VIRTUALENV_PROMPT_TEMPLATE = "({0}env) "
 DEFAULT_CONFIG_FILENAME = "conf/proj.cfg"
 MAX_DOWNLOAD_RETRIES = 3
 
-DEFAULT_PACKAGE_SETTINGS = dict(
+DEFAULT_PROJECT_SETTINGS = dict(
     name="",
     dir="",
     config_dir="conf",
@@ -76,7 +76,6 @@ def raw_input_with_default(prompt, default_input_string="['']"):
 ##########################################
 # Exit functions                         #
 ##########################################
-
 def exit_with_error():
     print "Exiting. virtstrap task incomplete."
     sys.exit(EXIT_WITH_ERROR)
@@ -156,14 +155,17 @@ def all_files_exist(files):
             return False
     return True
 
-def get_virtualenv_dir_abspath():
-    return os.path.abspath(settings['virtualenv_dir'])
+def get_virtualenv_dir():
+    return settings['virtualenv_dir']
 
-def resource_local_path(file_path):
+def get_virtualenv_dir_abspath():
+    return settings['virtualenv_dir_abspath']
+
+def resource_local_path(file_path=""):
     virtstrap_resource_dir = settings['virtstrap_resource_dir']
     return os.path.join(virtstrap_resource_dir, file_path)
 
-def resource_remote_url(file_path):
+def resource_remote_url(file_path=""):
     base_url = settings['virtstrap_base_url']
     return os.path.join(base_url, file_path)
 
@@ -195,7 +197,7 @@ def download_resource_file(file_path):
 def make_current_settings(settings_filename, default_settings=None):
     # set default_settings
     if not default_settings:
-        default_settings = DEFAULT_PACKAGE_SETTINGS
+        default_settings = DEFAULT_PROJECT_SETTINGS
     # Try opening the settings file
     try:
         settings_file = CommentlessFile(settings_filename)
@@ -227,11 +229,13 @@ def make_current_settings(settings_filename, default_settings=None):
     # Create the default virtualenv prompt using the package name
     prompt = VIRTUALENV_PROMPT_TEMPLATE.format(package_name)
     current_settings['prompt'] = prompt
+    current_settings['virtualenv_dir_abspath'] = os.path.abspath(
+            current_settings['virtualenv_dir'])
    
     # Create setting for virtstrap resource directory
-    virtstrap_resource_dir = os.path.join(get_virtualenv_dir_abspath(),
-            "virtstrap")
-    current_settings['virtstrap_resource_dir']
+    virtstrap_resource_dir = os.path.join(
+            current_settings['virtualenv_dir_abspath'], "virtstrap")
+    current_settings['virtstrap_resource_dir'] = virtstrap_resource_dir
 
     # Collect the installation sections
     all_sections = config.sections()
@@ -255,7 +259,10 @@ def make_current_settings(settings_filename, default_settings=None):
                 selected_install_profile)
         exit_with_error()
 
-    return current_settings, install_settings
+    #Collect environment settings
+    environment_settings = dict()
+
+    return current_settings, install_settings, environment_settings
     
 ##########################################
 # Installer commands                     #
@@ -317,10 +324,10 @@ def create_virtualenv():
         print message
         exit_with_error()
     # Create a virtual environment directory
-    virtualenv_dir = settings['virtualenv_dir']
+    virtualenv_dir = get_virtualenv_dir()
     virtualenv_dir_abspath = get_virtualenv_dir_abspath()
     print "Creating Virtual Environment in {0}".format(virtualenv_dir_abspath)
-    virtualenv.create_environment(settings['virtualenv_dir'], 
+    virtualenv.create_environment(virtualenv_dir,
             site_packages=settings['use_site_packages'], 
             prompt=settings['prompt'])
     # Create activation script
@@ -328,44 +335,33 @@ def create_virtualenv():
     # Download template if necessary
     if not all_files_exist([resource_local_path(activate_template)]):
         download_resource_file(activate_template)
+    # Add virtstrap resources to the sys.path
+    virtstrap_packages_dir = resource_local_path("packages")
+    sys.path.insert(0, virtstrap_packages_dir)
+
     # Build the file from the template
     print "Creating quickactivate.sh script for virtualenv"
     quick_activation_script(virtualenv_dir_abspath)
 
 
-QUICK_ACTIVATION_SCRIPT_TEMPLATE = """
-#!/bin/bash
-source {virtualenv_dir}/bin/activate
-
-# Save the deactivate function from virtualenv under a different name
-virtualenvwrapper_original_deactivate=`typeset -f deactivate | sed 's/deactivate/virtualenv_deactivate/g'`
-eval "$virtualenvwrapper_original_deactivate"
-unset -f deactivate >/dev/null 2>&1
-
-#eval `python {virtualenv_dir}/hooks/env.py {environment_script}`
-
-deactivate () {
-    virtualenv_deactivate $1
-
-    #deactivate_custom_env $1
-
-    if [ ! "$1" = "nondestructive" ]
-    then
-        # Remove this function
-        unset -f virtualenv_deactivate >/dev/null 2>&1
-        unset -f deactivate >/dev/null 2>&1
-    fi
-}
-"""
-
-def quick_activation_script(virtualenv_dir, file="quickactivate.sh", 
-        base_path='./'):
+def quick_activation_script(virtualenv_dir, 
+        template_filename="quickactivate.sh.tmpl", 
+        output_filename="quickactivate.sh", base_path='./'):
+    import tempita
     """Builds a virtualenv activation script shortcut"""
-    quick_activate_filename = os.path.join(base_path, file)
+    # Load Template
+    quick_activate_template = tempita.Template.from_filename(
+            resource_local_path(template_filename))
+    # Prepare template context
+    context = settings.copy()
+    context['environment'] = environment_settings
+    # Render template to string
+    output_string = quick_activate_template.substitute(context)
+    # Open output file for writing
+    quick_activate_filename = os.path.join(base_path, output_filename)
     quick_activate_file = open(quick_activate_filename, 'w')
-    quick_activate_file.writelines(["#!/bin/bash\n", 
-        "source {0}/bin/activate".format(virtualenv_dir)])
-    #Hook into virtualenv's deactivate
+    # Write to the file
+    quick_activate_file.write(output_string)
     quick_activate_file.close()
 
 def run_build():
@@ -418,6 +414,7 @@ options, args = parser.parse_args() #Global options and args
 
 settings = None # Global settings for the script
 install_settings = None # Global installation profiles
+environment_settings = None # Environment Settings
 
 ##########################################
 # Main                                   #
@@ -430,8 +427,8 @@ def main():
         # Otherwise use the first argument as the command
         command_name = args[0]
     # Compile settings and installation_profiles into global settings variable
-    global settings, install_settings
-    settings, install_settings = make_current_settings(
+    global settings, install_settings, environment_settings
+    settings, install_settings, environment_settings = make_current_settings(
             options.config)
 
     # Choose virtstrap command from dictionary of commands
