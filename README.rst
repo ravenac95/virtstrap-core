@@ -3,7 +3,9 @@ VirtStrap
 
 A simple script that allows you to setup a repeatable project using a
 variety of tools. The project came out of a need to use some things
-from buildout and some things from pip and virtualenv. 
+from buildout and some things from pip and virtualenv. However,
+eventually buildout support was abandoned as pip and virtualenv
+were powerful enough for the job.
 
 Why I made virtstrap
 --------------------
@@ -18,7 +20,7 @@ For those of you who have not experienced it, ipython does not work well
 with Leopard's version of libedit. However, installing readline via
 ``easy_install`` is the only way to get it to work (oddly enough it won't
 work through a pip installation). So this forced me to come up with a 
-solution that would solve my problem with both buildout and virtualenv+pip.
+solution that would solve my problems of repeatability and flexibility.
 
 The result is virtstrap.
 
@@ -42,11 +44,7 @@ virtstrap Quick Start Guide
 The easiest way to get started with virtstrap is to install it
 on your local machine by simply doing the following:
 
-``python setup.py install``
-
-or 
-
-``python setup.py develop``
+``pip install virtstrap``
 
 Note: If you don't want to install it into your system. Look below for
 an alternative installation.
