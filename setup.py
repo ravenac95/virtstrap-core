@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="VirtStrap",
-    version="0.2.0",
+    version="0.2.1",
     license="MIT",
     author="Reuven V. Gonzales",
     url="https://github.com/ravenac95/virtstrap",
