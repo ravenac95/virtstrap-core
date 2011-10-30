@@ -1,0 +1,8 @@
+########################################
+# VirtStrap Project configuration file #
+########################################
+[project] # Project settings
+name = {{package}}
+
+[install] # Install settings
+requirements = requirements.txt

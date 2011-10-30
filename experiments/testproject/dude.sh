@@ -1,2 +1,0 @@
-WHATTHE="FUDGE"
-export WHATTHE
