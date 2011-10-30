@@ -14,9 +14,9 @@ setup(
     version="0.2.0",
     license="MIT",
     author="Reuven V. Gonzales",
-    url="http://tobetter.us",
+    url="https://github.com/ravenac95/virtstrap",
     author_email="reuven@tobetter.us",
-    description="A simple boostrapping mechanism for virtualenv, buildout and shell scripts",
+    description="A bootstrapping mechanism for virtualenv+pip and shell scripts",
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
@@ -32,7 +32,8 @@ setup(
     classifiers = [
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Operating System :: POSIX',
+        'Topic :: Software Development :: Build Tools',
     ],
 )
