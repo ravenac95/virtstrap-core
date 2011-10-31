@@ -28,6 +28,7 @@ setup(
     entry_points="""
         [paste.paster_create_template]
         virtstrap_basic = virtstrap.entry.template:VirtStrapBasicTemplate
+        virtstrap_ipython = virtstrap.entry.template:VirtStrapIPythonTemplate
     """,
     classifiers = [
         'License :: OSI Approved :: MIT License',
