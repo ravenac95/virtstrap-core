@@ -4,14 +4,11 @@ VirtStrap
 
 A bootstrapping mechanism for virtualenv, buildout, and shell scripts.
 """
-from distribute_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup, find_packages
 
 setup(
     name="VirtStrap",
-    version="0.2.1",
+    version="0.2.2",
     license="MIT",
     author="Reuven V. Gonzales",
     url="https://github.com/ravenac95/virtstrap",
