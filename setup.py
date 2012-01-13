@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="VirtStrap",
-    version="0.2.2",
+    version="0.2.3",
     license="MIT",
     author="Reuven V. Gonzales",
     url="https://github.com/ravenac95/virtstrap",
