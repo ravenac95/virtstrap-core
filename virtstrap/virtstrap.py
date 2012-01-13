@@ -695,14 +695,14 @@ class VirtStrap(object):
         opts_to_settings_mapping = [
             ("virtstrap_base_dir", "base_dir"),
             ("virtstrap_resources_url", "resource_url"),
-            ("virtstrap_config_dir", "virtstrap_config_dir"),
+            ("virtstrap_config_dir", "config_dir"),
         ]
         options = self._options
         override = {}
         for opt_key, settings_key in opts_to_settings_mapping:
             opt_value = getattr(options, opt_key)
             if opt_value is not None:
-                override[opt_key] = opt_value
+                override[settings_key] = opt_value
         return override
 
     def _create_virtstrap_dirs(self):
