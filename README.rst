@@ -69,31 +69,26 @@ To add virtstrap to your project. The most basic usage is::
     cd path_to_your_project_path
     vstrap init
 
-This will download virtstrap.py into your project's directory. Finally,
-run:: 
-
-    vstrap up
-
-This will add a directory named ``vs.env`` and a file called 
+This will add a directory named ``.vs.env`` and a file called 
 ``quickactivate.sh`` to your directory.
 
-Configuration Options
----------------------
+Configuration Files
+-------------------
 
 As of 0.3.x configuration files won't be required. Granted, virtstrap isn't
 very useful without it, but, if you really want to start a virtstrapped 
-environment without doing anything, it's as simple as 
-``vstrap init && vstrap up``.
+environment without doing anything, it's as simple as ``vstrap init``.
 
-To get more out of virtstrap you should define a configuration file.
+To get more out of virtstrap you should define a VEfile. This stands for
+virtual environment file. This is a general purpose file to be used for 
+defining your virtual environment.
 
 The configuration file will be expected in one of the following locations
 inside your project's root directory.
 
-- proj.yaml
-- proj.yml
-- conf/proj.yaml (this is the preferred location)
-- conf/proj.yml
+- VEfile
+- conf/VEfile
 
-Any other location can be specified, but these are provided for convenience 
-and should, for the most part, be followed.
+At the moment the file is a YAML file. Eventually I hope to move away from
+yaml as it's syntax can get in the way of defining requirements and
+the general environment.
