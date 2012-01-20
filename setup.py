@@ -7,8 +7,8 @@ A bootstrapping mechanism for virtualenv, buildout, and shell scripts.
 from setuptools import setup, find_packages
 
 setup(
-    name="VirtStrap",
-    version="0.2.3",
+    name="virtstrap",
+    version="0.3.0-alpha",
     license="MIT",
     author="Reuven V. Gonzales",
     url="https://github.com/ravenac95/virtstrap",
