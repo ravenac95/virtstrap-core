@@ -49,9 +49,15 @@ Why not virtualenv-wrapper?
 ---------------------------
 
 I looked into using it but it did not fit my particular needs. It's a great
-tool but I wanted to create a tool that didn't have to be installed system 
-wide to see use. Granted, it is easier when it is installed system wide, but
-I believe it's still usable without install virtstrap on the system.
+tool but I originally wanted to create a tool that didn't have to be installed 
+system wide to see use. Now, however, I see that as a horrible oversight and 
+an unnecessary limitation. Although I still feel there is something elegant 
+about keeping the package out of the global system, it now seems unreasonable
+to me. As a consequence, this question seems even more relevant. However,
+after having built the initial versions of virtstrap, I realized 
+that virtstrap could make virtualenv-wrapper even simpler. It could also be 
+shared between developers, build systems, and any number of scenarios. So,
+here's my crack at making something truly useful for python development.
 
 virtstrap Quick Start Guide
 ---------------------------
@@ -79,7 +85,7 @@ As of 0.3.x configuration files won't be required. Granted, virtstrap isn't
 very useful without it, but, if you really want to start a virtstrapped 
 environment without doing anything, it's as simple as ``vstrap init``.
 
-To get more out of virtstrap you should define a VEfile. This stands for
+To get more out of virtstrap you should define a ``VEfile``. This stands for
 virtual environment file. This is a general purpose file to be used for 
 defining your virtual environment.
 
@@ -90,5 +96,5 @@ inside your project's root directory.
 - conf/VEfile
 
 At the moment the file is a YAML file. Eventually I hope to move away from
-yaml as it's syntax can get in the way of defining requirements and
+yaml as its syntax can get in the way of defining requirements and
 the general environment.

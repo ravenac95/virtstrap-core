@@ -3,7 +3,8 @@ VirtstrapConfig
 ===============
 
 VirtstrapConfig is an interface to the VEfile. It collects the VEfile's 
-settings between all the applicable profiles.
+settings between all the applicable profiles. It provides a way to query
+for a compiled section of data within the VirtstrapConfig.
 """
 import yaml
 
