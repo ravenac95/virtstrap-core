@@ -22,8 +22,10 @@ Run the virtstrap.py in directory ``foo``::
     vstrap update foo
 
 Upgrade virtstrap to latest version in current directory
-it may print warnings::
+it may print warnings about the upgrade::
 
     vstrap upgrade-script 
 
-Upgrade virtstrap to latest version in directory ``foo``
+Upgrade virtstrap to latest version in directory ``foo``::
+
+    vstrap upgrade-script
