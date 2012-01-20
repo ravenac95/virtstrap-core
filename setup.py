@@ -27,9 +27,6 @@ setup(
                 'virtstrap_basic = virtstrap.entry.template:VirtStrapBasicTemplate', 
                 'virtstrap_ipython = virtstrap.entry.template:VirtStrapIPythonTemplate',
             ],
-            'console_scripts': [
-                'vstrap = virtstrap.script:main',
-            ]
         },
     classifiers = [
         'License :: OSI Approved :: MIT License',

@@ -20,6 +20,11 @@ class VirtstrapConfig(object):
         config.parse(string)
         return config
 
+    @classmethod
+    def from_file(cls, filename):
+        string = open(filename)
+        return cls.from_string(string)
+
     def parse(self, string):
         raw_config_data = yaml.load_all(string)
         profile_data = {}
@@ -53,7 +58,12 @@ class VirtstrapConfig(object):
                 elif isinstance(compiled_data, list):
                     compiled_data.extend(section_data)
                 else:
-                    compiled_data = section_data
+                    if isinstance(section_data, dict):
+                        compiled_data = section_data.copy()
+                    elif isinstance(section_data, list):
+                        compiled_data = section_data[:]
+                    else:
+                        compiled_data = section_data
         return compiled_data
 
 
