@@ -1,0 +1,59 @@
+# Compile files
+*.so
+*.o
+*.exe
+*.com
+*.class
+*.dll
+*.pyc
+
+# packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.tar
+*.rar
+*.zip
+
+# log files and databases
+sqlite.db
+*.log
+.DS_Store?
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+*.db
+*.db.*
+
+# vim files
+.*.sw*
+
+# Other Python Specific
+*.egg-info
+*.egg
+*.EGG
+*.EGG-INFO
+bin
+build
+develop-eggs
+downloads
+eggs
+parts
+dist
+#virtstrap
+quickactivate.sh
+vs.env
+.installed.cfg
+
+# Misc
+*.bak
+*.tmp
+plustronic/products/management/commands/Images
+uploads
+devspecific.py
+
+# Sass
+.sass-cache
