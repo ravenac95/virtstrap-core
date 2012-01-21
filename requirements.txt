@@ -1,3 +1,4 @@
 nose
 virtualenv
 pyyaml
+fudge
