@@ -24,7 +24,13 @@ class VirtstrapRunner(object):
 
     def load_command(self, name):
         """Load command from virtstrap.commands"""
-        pass
+        import_path = 'virtstrap.commands.%s' % name
+        try:
+            module = __import__(import_path)
+        except ImportError:
+            raise CommandDoesNotExist('Command "%s" does not exist' % name)
+        return module
+
 
 def main(args=None):
     if args == ["--help"]:
