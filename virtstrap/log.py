@@ -1,5 +1,8 @@
 import logging
 
+logging.basicConfig(filename=".virtstrap.log", 
+        level=logging.INFO, filemode="w")
+
 CLINT_AVAILABLE = True
 try:
     from clint.textui import puts, colored
@@ -16,7 +19,8 @@ class VirtstrapConsoleLogHandler(logging.Handler):
 
     def emit(self, record):
         outputter = self._outputter 
-        outputter.write(record.msg, record.levelname)
+        output_string = self.format(record)
+        outputter.write(output_string, record.levelname)
 
 class ConsoleLogOutputter(object):
     def write(self, output, level):

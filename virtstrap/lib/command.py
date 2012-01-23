@@ -24,9 +24,8 @@ class Command(object):
         try:
             self.run(*cli_args, **cli_options.__dict__)
         except:
-            self.logger.exception("dude")
-            #self.logger.exception('An error occured executing command "%s"' %
-                    #self.__class__.__name__)
+            self.logger.exception('An error occured executing command "%s"' %
+                    self.__class__.__name__)
             return 2
         return 0
 
