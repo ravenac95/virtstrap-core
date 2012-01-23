@@ -5,6 +5,18 @@ VirtStrap
 A bootstrapping mechanism for virtualenv, buildout, and shell scripts.
 """
 from setuptools import setup, find_packages
+import sys
+
+
+# Installation requirements
+REQUIREMENTS = [
+    'PasteScript>=1.3', 
+    'virtualenv',
+    'pyyaml',
+]
+
+if sys.version_info < (2, 7):
+    REQUIREMENTS.append('argparse>=1.2.1')
 
 setup(
     name="virtstrap",
@@ -18,10 +30,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='*nix',
-    install_requires=[
-        "PasteScript>=1.3",
-        "virtualenv",
-    ],
+    install_requires=REQUIREMENTS,
     entry_points={
             'paste.paster_create_template': [
                 'virtstrap_basic = virtstrap.entry.template:VirtStrapBasicTemplate', 
