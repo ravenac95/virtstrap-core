@@ -15,7 +15,6 @@ class VirtstrapRunner(object):
         """Handles execution through command line interface"""
         if not args:
             args = sys.argv[1:]
-        print args
         parser = create_parser()
         cli_options, cli_args = parser.parse_args(args=args)
         self.handle_global_options(cli_options)

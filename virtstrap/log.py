@@ -35,7 +35,6 @@ class ColoredConsoleLogOutputter(ConsoleLogOutputter):
         colored_function = getattr(colored, color, lambda text: text)
         colored_output = colored_function(output)
         puts(colored_output)
-        print output
 
 logger = logging.getLogger("virtstrap")
 
