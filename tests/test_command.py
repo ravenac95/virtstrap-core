@@ -4,18 +4,16 @@ Test Base Command
 """
 import fudge
 from nose.tools import *
-from virtstrap.lib.command import BaseCommand
+from virtstrap.lib.command import Command
 
-class FakeCommand(BaseCommand):
+class FakeCommand(Command):
     name = 'fake'
     args = ['argument_one']
     description = 'Fake Description'
 
-    def __init__(self, test_obj, **kwargs):
-        super(FakeCommand, self).__init__(**kwargs)
+    def __init__(self, test_obj):
+        super(FakeCommand, self).__init__()
         self.test_obj = test_obj
-        parser = self.parser
-        parser.add_option("-t", "--test", dest="test")
 
     def run(self, *args, **kwargs):
         self.test_obj.write("This is a test")
@@ -23,10 +21,9 @@ class FakeCommand(BaseCommand):
 @fudge.test
 def test_initialize_command():
     """Test initializing fake command."""
-    fake_parser = fudge.Fake('parser').expects('add_option')
-    command = FakeCommand(None, parser=fake_parser)
+    command = FakeCommand(None)
 
 @raises(AssertionError)
 def test_initialize_base_command():
     """Test initializing the base command. Should fail"""
-    command = BaseCommand()
+    command = Command()

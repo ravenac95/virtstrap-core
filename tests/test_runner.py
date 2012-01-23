@@ -36,12 +36,8 @@ class TestVirtstrapRunner(object):
         """Run the help command"""
         test_args = ['--help']
         system_exit = False
-        try:
-            self.runner.main(args=test_args)
-        except SystemExit, e:
-            system_exit = True
-            assert e.code == 0
-        assert system_exit == True, "Runner didn't issue a system exit"
+        code = self.runner.main(args=test_args)
+        assert code == 0
 
     def test_run_init(self):
         """Run the init command"""
@@ -49,5 +45,7 @@ class TestVirtstrapRunner(object):
         with in_temp_directory() as temp_directory:
             return_code = self.runner.main(args=test_args)
             virtual_environment_path = os.path.join(temp_directory, ".vs.env")
+            quick_activate_path = os.path.join(temp_directory, "quickactivate.sh")
             assert os.path.exists(virtual_environment_path) == True
+            assert os.path.exists(quick_activate_path) == True
             assert return_code == 0
