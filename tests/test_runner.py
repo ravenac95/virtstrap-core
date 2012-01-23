@@ -49,3 +49,15 @@ class TestVirtstrapRunner(object):
             assert os.path.exists(virtual_environment_path) == True
             assert os.path.exists(quick_activate_path) == True
             assert return_code == 0
+
+    def test_run_init_builds_to_different_directory(self):
+        env_dir = 'envdir'
+        test_args = ['init', '--virtstrap-dir=%s' % env_dir]
+        with in_temp_directory() as temp_directory:
+            return_code = self.runner.main(args=test_args)
+            virtual_environment_path = os.path.join(temp_directory, env_dir)
+            quick_activate_path = os.path.join(temp_directory, "quickactivate.sh")
+            assert os.path.exists(virtual_environment_path) == True
+            assert os.path.exists(quick_activate_path) == True
+            assert return_code == 0
+
