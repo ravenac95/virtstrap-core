@@ -48,7 +48,6 @@ class VirtstrapRunner(object):
 
     def run_command(self, name, args, base_options,):
         """Load command from virtstrap.commands"""
-        # FIXME fake information
         logger.debug('Command "%s" chosen' % name)
         return registry.run(name, args, base_options)
 
