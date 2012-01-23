@@ -47,7 +47,7 @@ VERBOSITY_LEVELS = {
 
 def setup_logger(verbosity, no_colored_output=False):
     """Sets up the logger for the program. DO NOT USE DIRECTLY IN COMMANDS"""
-    verbosity_level = VERBOSITY_LEVELS.get(verbosity, logging.WARNING)
+    verbosity_level = VERBOSITY_LEVELS.get(verbosity, logging.INFO)
     if not verbosity_level:
         return
     outputter = ConsoleLogOutputter()
