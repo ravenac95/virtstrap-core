@@ -6,6 +6,7 @@ try:
 except:
     # Clint is still not stable enough yet to just import with so much
     # trust, but I really like colored output. So we'll give it a shot
+    # and if it doesn't work we will just do something else.
     CLINT_AVAILABLE = False
 
 class VirtstrapConsoleLogHandler(logging.Handler):
