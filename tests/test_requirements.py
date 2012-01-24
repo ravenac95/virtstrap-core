@@ -1,8 +1,8 @@
 import fudge
 from nose.tools import raises
 from virtstrap.lib.requirements import (RequirementTranslator, 
-        RequirementSpecificationSyntaxError, RequirementScanner,
-        RequirementParser)
+        RequirementSpecSyntaxError, RequirementScanner,
+        RequirementParser, RequirementTokenizer, TokenTable)
 
 def test_initialize_translator():
     """Test that we can initialize the requirements translator"""
@@ -65,7 +65,7 @@ class TestRequirementParserAlone():
         fake_return = 'fake_return'
         self.set_tokens([
             ('compare', '=='),
-            ('version', '1.3.0'),
+            ('VERSION', '1.3.0'),
         ])
         # Expect the builder to call an add condition
         self.set_expect_add_condition(version, condition)
@@ -82,12 +82,35 @@ class TestRequirementParserAlone():
         fake_return = 'fake_return'
         self.set_tokens([
             ('compare', '>='),
-            ('version', '1.3.0'),
+            ('VERSION', '1.3.0'),
         ])
         self.set_expect_add_condition(version, condition)
         self.set_fake_result(fake_return)
         requirement = self.parser.parse(version)
         assert requirement == fake_return
+
+def test_initialize_tokenizer():
+    tokenizer = RequirementTokenizer()
+
+class TestRequirementTokenizer(object):
+    def setup(self):
+        self.mock_scanner = fudge.Fake()
+        self.mock_token_table = fudge.Fake()
+        self.tokenizer = RequirementTokenizer(scanner=self.mock_scanner,
+                token_table=self.mock_token_table)
+
+    @fudge.test
+    def test_tokenize_requirement(self):
+        self.mock_scanner.expects('scan').returns(([
+            ('literal', 'abc'),
+        ], ''))
+        (self.mock_token_table.expects('create_token').with_args(
+                'literal', 'abc'))
+        for token in self.tokenizer.tokenize(''):
+            pass
+
+def test_initialize_token_table():
+    token_table = TokenTable()
 
 def test_initialize_scanner():
     scanner = RequirementScanner()
@@ -97,8 +120,9 @@ class TestRequirementScanner(object):
         self.scanner = RequirementScanner()
     
     def run_scan(self, spec, expected):
-        tokens = self.scanner.scan(spec)
+        tokens, remainder = self.scanner.scan(spec)
         assert tokens == expected
+        assert remainder == ''
 
     def test_scan_versions(self):
         tests = [
@@ -106,7 +130,7 @@ class TestRequirementScanner(object):
             '2.3.',
         ]
         for spec in tests:
-            expected = [('version', spec)]
+            expected = [('VERSION', spec)]
             yield self.run_scan, spec, expected
 
     def test_scan_x_version(self):
@@ -119,25 +143,25 @@ class TestRequirementScanner(object):
             '0.x.x',
         ]
         for spec in tests:
-            expected = [('x_version', spec)]
+            expected = [('X_VERSION', spec)]
             yield self.run_scan, spec, expected
 
     def test_scan_to_operator(self):
         tests = [
             ('0.6.x to 12.3.x', [
-                ('x_version', '0.6.x'),
-                ('to_operator', 'to'),
-                ('x_version', '12.3.x'),
+                ('X_VERSION', '0.6.x'),
+                ('bin_operator', 'to'),
+                ('X_VERSION', '12.3.x'),
             ]),
             ('10.612.x  to  12.313.x', [
-                ('x_version', '10.612.x'),
-                ('to_operator', 'to'),
-                ('x_version', '12.313.x'),
+                ('X_VERSION', '10.612.x'),
+                ('bin_operator', 'to'),
+                ('X_VERSION', '12.313.x'),
             ]),
             ('5.0  to  5.4', [
-                ('version', '5.0'),
-                ('to_operator', 'to'),
-                ('version', '5.4'),
+                ('VERSION', '5.0'),
+                ('bin_operator', 'to'),
+                ('VERSION', '5.4'),
             ])
         ]
         for spec, expected in tests:
@@ -147,35 +171,35 @@ class TestRequirementScanner(object):
         tests = [
             ('>=1.4.0', [
                 ('compare', '>='),
-                ('version', '1.4.0'),
+                ('VERSION', '1.4.0'),
             ]),
             ('>=1.2', [
                 ('compare', '>='),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
             ('<=1.2', [
                 ('compare', '<='),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
             ('<1.2', [
                 ('compare', '<'),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
             ('>1.2', [
                 ('compare', '>'),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
             ('>   1.2', [
                 ('compare', '>'),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
             ('==1.2', [
                 ('compare', '=='),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
             ('== 1.2', [
                 ('compare', '=='),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
             ]),
         ]
         for spec, expected in tests:
@@ -186,30 +210,30 @@ class TestRequirementScanner(object):
         tests = [
             ('>1.2,<2.0', [
                 ('compare', '>'),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
                 ('comma', ','),
                 ('compare', '<'),
-                ('version', '2.0'),
+                ('VERSION', '2.0'),
             ]),
             ('>1.2,<2.0,==1.5', [
                 ('compare', '>'),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
                 ('comma', ','),
                 ('compare', '<'),
-                ('version', '2.0'),
+                ('VERSION', '2.0'),
                 ('comma', ','),
                 ('compare', '=='),
-                ('version', '1.5'),
+                ('VERSION', '1.5'),
             ]),
             ('> 1.2, < 2.0, == 1.5', [
                 ('compare', '>'),
-                ('version', '1.2'),
+                ('VERSION', '1.2'),
                 ('comma', ','),
                 ('compare', '<'),
-                ('version', '2.0'),
+                ('VERSION', '2.0'),
                 ('comma', ','),
                 ('compare', '=='),
-                ('version', '1.5'),
+                ('VERSION', '1.5'),
             ]),
         ]
         for spec, expected in tests:
