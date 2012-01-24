@@ -6,8 +6,12 @@
 
 reqs:
   - django # simple requirement version doesn't matter
-  - flask: 0.6.x # Will grab the from 0.6.0 to 0.6.#
-  - requests: 
+  - flask: '0.6.x' # Will grab the from 0.6.0 to 0.6.#
+  - flask: '>=1.4,<2.0' # Becomes >=1.4,<2.0 (, means and)
+  - flask: '0.6.x to 0.7.x' # Becomes >=0.6,<0.8 (range)
+  - flask: '0.7 to 0.8' # Becomes >=0.7,<=0.8a1
+  - flask: '0.7 to 1.0.x' # Becomes >=0.7,<1.1
+  - requests:
     - github|kennethreitz/requests
     - editable: true
   - lxml: >=2.3
