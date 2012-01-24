@@ -12,7 +12,18 @@ class RequirementTranslator(object):
         return "==" + requirement
 
 class RequirementParser(object):
-    pass
+    def __init__(self, builder=None, tokenizer=None):
+        self.builder = builder
+        self.tokenizer = tokenizer
+
+    def parse(self, string):
+        builder = self.builder
+        tokenizer = self.tokenizer
+        # Get tokens
+        tokens = tokenizer.tokenize(string)
+        
+        builder.add_condition(string, '==')
+        return builder.get_result()
 
 # Requirement token processors
 def x_version(scanner, token):

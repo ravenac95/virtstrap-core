@@ -1,3 +1,4 @@
+import fudge
 from nose.tools import raises
 from virtstrap.lib.requirements import (RequirementTranslator, 
         RequirementSpecificationSyntaxError, RequirementScanner,
@@ -38,12 +39,55 @@ class TestRequirementTranslator(object):
 def test_initialize_parser():
     parser = RequirementParser()
 
-class TestRequirementParser():
+class TestRequirementParserAlone():
+    """Unit tests for requirements parser"""
     def setup(self):
-        self.parser = RequirementParser()
+        self.mock_builder = fudge.Fake('builder')
+        self.mock_tokenizer = fudge.Fake('tokenizer')
+        self.parser = RequirementParser(builder=self.mock_builder,
+                tokenizer=self.mock_tokenizer)
 
+    def set_expect_add_condition(self, version, condition):
+        self.mock_builder.expects('add_condition').with_args(
+                version, condition)
+
+    def set_fake_result(self, result_value):
+        self.mock_builder.expects('get_result').returns(result_value)
+
+    def set_tokens(self, tokens):
+        self.mock_tokenizer.expects('tokenize').returns(tokens)
+
+    @fudge.test
     def test_parse_simple_requirement(self):
-        pass
+        # builder expects builder.add_condition(version, condition)
+        version = '1.3.0'
+        condition = '=='
+        fake_return = 'fake_return'
+        self.set_tokens([
+            ('compare', '=='),
+            ('version', '1.3.0'),
+        ])
+        # Expect the builder to call an add condition
+        self.set_expect_add_condition(version, condition)
+        # Make it return a fake result
+        self.set_fake_result(fake_return)
+        requirement = self.parser.parse(version)
+        assert requirement == fake_return
+
+    @fudge.test
+    def test_parse_conditioned_requirement(self):
+        version = '1.3.0'
+        condition = '>='
+        spec = '%s%s' % (condition, version)
+        fake_return = 'fake_return'
+        self.set_tokens([
+            ('compare', '>='),
+            ('version', '1.3.0'),
+        ])
+        self.set_expect_add_condition(version, condition)
+        self.set_fake_result(fake_return)
+        requirement = self.parser.parse(version)
+        assert requirement == fake_return
 
 def test_initialize_scanner():
     scanner = RequirementScanner()
