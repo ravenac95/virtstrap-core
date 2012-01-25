@@ -48,7 +48,8 @@ class Token(object):
         raise RequirementSpecSyntaxError('Syntax error (%r).' % self.symbol)
 
     def left_detonation(self, left):
-        raise RequirementSpecSyntaxError('Unknown operator (%r).' % self.symbol)
+        raise RequirementSpecSyntaxError('Unknown operator '
+                '(%r).' % self.symbol)
 
 # FIXME this could be done much better
 class SymbolTable(object):
@@ -84,7 +85,8 @@ class SymbolTable(object):
         TokenClass.left_detonation = left_detonation
         return TokenClass
 
-    def define_unary_operator(self, token_type, symbol, binding_power, position="left"):
+    def define_unary_operator(self, token_type, symbol, binding_power, 
+            position="left"):
         TokenClass = self.define_symbol(token_type, symbol, binding_power)
         if position == "left":
             # if the operator is on the left like -1 or not 2 then use
