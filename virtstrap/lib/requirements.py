@@ -155,7 +155,7 @@ class RequirementScanner(object):
         (r'[0-9]+(\.[0-9]+)*(\.x){0}\.?', version),
         (r'\bto\b', bin_operator),
         (r',', comma_operator),
-        (r'((>|<)=?)|(==)', compare_operator),
+        (r'((>|<|!)=?)|(==)', compare_operator),
         (r'\s+', None),
     ]
     

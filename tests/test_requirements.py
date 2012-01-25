@@ -223,6 +223,10 @@ class TestRequirementScanner(object):
                 ('compare', '=='),
                 ('VERSION', '1.2'),
             ]),
+            ('!= 1.2', [
+                ('compare', '!='),
+                ('VERSION', '1.2'),
+            ]),
         ]
         for spec, expected in tests:
             yield self.run_scan, spec, expected
