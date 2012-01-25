@@ -2,7 +2,8 @@ import fudge
 from nose.tools import raises
 from virtstrap.lib.requirements import (RequirementTranslator, 
         RequirementSpecSyntaxError, RequirementScanner,
-        RequirementParser, RequirementTokenizer, TokenTable)
+        RequirementParser, RequirementTokenizer, SymbolTable, 
+        Token)
 
 def test_initialize_translator():
     """Test that we can initialize the requirements translator"""
@@ -35,58 +36,49 @@ class TestRequirementTranslator(object):
         translated_spec = self.translator.translate(spec)
         assert translated_spec == expected
 
-
 def test_initialize_parser():
     parser = RequirementParser()
 
 class TestRequirementParserAlone():
     """Unit tests for requirements parser"""
     def setup(self):
-        self.mock_builder = fudge.Fake('builder')
         self.mock_tokenizer = fudge.Fake('tokenizer')
-        self.parser = RequirementParser(builder=self.mock_builder,
-                tokenizer=self.mock_tokenizer)
-
-    def set_expect_add_condition(self, version, condition):
-        self.mock_builder.expects('add_condition').with_args(
-                version, condition)
-
-    def set_fake_result(self, result_value):
-        self.mock_builder.expects('get_result').returns(result_value)
+        self.parser = RequirementParser(tokenizer=self.mock_tokenizer)
 
     def set_tokens(self, tokens):
-        self.mock_tokenizer.expects('tokenize').returns(tokens)
+        fake_end_token = (fudge.Fake('end_token')
+                .has_attr(left_binding_power=0)
+                .is_a_stub())
+        tokens.append(fake_end_token)
+        self.mock_tokenizer.expects('tokenize').returns(iter(tokens))
 
     @fudge.test
-    def test_parse_simple_requirement(self):
+    def test_parse_single_token(self):
         # builder expects builder.add_condition(version, condition)
-        version = '1.3.0'
-        condition = '=='
         fake_return = 'fake_return'
+        fake_token = (fudge.Fake('token')
+                .expects('null_detonation').returns(fake_return))
         self.set_tokens([
-            ('compare', '=='),
-            ('VERSION', '1.3.0'),
+            fake_token,
         ])
-        # Expect the builder to call an add condition
-        self.set_expect_add_condition(version, condition)
-        # Make it return a fake result
-        self.set_fake_result(fake_return)
-        requirement = self.parser.parse(version)
+        requirement = self.parser.parse('')
         assert requirement == fake_return
 
     @fudge.test
     def test_parse_conditioned_requirement(self):
-        version = '1.3.0'
-        condition = '>='
-        spec = '%s%s' % (condition, version)
         fake_return = 'fake_return'
+        fake_token1 = (fudge.Fake('token1')
+                .expects('null_detonation').returns('left_arg'))
+        fake_token2 = (fudge.Fake('token2')
+                .expects('left_detonation')
+                .with_args('left_arg')
+                .returns(fake_return)
+                .has_attr(left_binding_power=10))
         self.set_tokens([
-            ('compare', '>='),
-            ('VERSION', '1.3.0'),
+            fake_token1,
+            fake_token2
         ])
-        self.set_expect_add_condition(version, condition)
-        self.set_fake_result(fake_return)
-        requirement = self.parser.parse(version)
+        requirement = self.parser.parse('')
         assert requirement == fake_return
 
 def test_initialize_tokenizer():
@@ -95,22 +87,52 @@ def test_initialize_tokenizer():
 class TestRequirementTokenizer(object):
     def setup(self):
         self.mock_scanner = fudge.Fake()
-        self.mock_token_table = fudge.Fake()
+        self.mock_symbol_table = fudge.Fake()
         self.tokenizer = RequirementTokenizer(scanner=self.mock_scanner,
-                token_table=self.mock_token_table)
+                symbol_table=self.mock_symbol_table)
 
     @fudge.test
     def test_tokenize_requirement(self):
         self.mock_scanner.expects('scan').returns(([
             ('literal', 'abc'),
         ], ''))
-        (self.mock_token_table.expects('create_token').with_args(
+        (self.mock_symbol_table.expects('create_token').with_args(
                 'literal', 'abc'))
         for token in self.tokenizer.tokenize(''):
             pass
 
-def test_initialize_token_table():
-    token_table = TokenTable()
+def test_initialize_symbol_table():
+    symbol_table = SymbolTable(None)
+
+class TestSymbolTable(object):
+    def setup(self):
+        self.mock_parser = fudge.Fake()
+        self.symbol_table = SymbolTable(self.mock_parser)
+
+    def test_define_symbol(self):
+        TokenClass = self.symbol_table.define_symbol('test', '?', 100)
+        assert Token in TokenClass.__bases__
+        assert TokenClass.symbol == '?'
+
+    def test_define_literal(self):
+        TokenClass = self.symbol_table.define_literal('literal')
+        assert Token in TokenClass.__bases__
+        assert TokenClass.symbol == 'literal'
+        assert 'literal' in self.symbol_table._literals
+
+    def test_create_literal_symbol(self):
+        self.symbol_table.define_literal('literal')
+        token = self.symbol_table.create_token('literal', '123')
+        nd = token.null_detonation()
+        assert token.null_detonation().value == '123'
+    
+    def test_create_binary_operator_symbol(self):
+        self.mock_parser.expects('expression').returns('right')
+        self.symbol_table.define_binary_operator('bin_operator', '+', 10)
+        token = self.symbol_table.create_token('bin_operator', '+')
+        left_det_values = token.left_detonation('left')
+        assert left_det_values.left == 'left'
+        assert left_det_values.right == 'right'
 
 def test_initialize_scanner():
     scanner = RequirementScanner()
