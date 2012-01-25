@@ -112,7 +112,7 @@ def compare_operator(scanner, token):
     return 'compare', token
 
 def comma_operator(scanner, token):
-    return 'comma', token
+    return 'bin_operator', token
 
 class RequirementScanner(object):
     rules = [
