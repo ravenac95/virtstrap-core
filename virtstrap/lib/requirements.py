@@ -11,6 +11,22 @@ class RequirementTranslator(object):
                 return requirement
         return "==" + requirement
 
+class RequirementParserEnvironment(object):
+    def __init__(self):
+        pass
+
+    def parse(self):
+        parser = self._parser
+
+    @property
+    def symbol_table(self):
+        symbol_table = self._symbol_table
+        if not symbol_table:
+            symbol_table = SymbolTable(self.parser)
+            self._symbol_table = symbol_table
+        return symbol_table
+
+
 class RequirementParser(object):
     def __init__(self, tokenizer=None):
         self.tokenizer = tokenizer
