@@ -5,7 +5,9 @@ Command line options
 import sys
 import pkg_resources
 from argparse import ArgumentParser
-import constants
+from virtstrap import constants
+from virtstrap.exceptions import *
+from virtstrap.log import logger
 
 # Sorry pip! Stole this from you
 try:
@@ -13,39 +15,50 @@ try:
     version = '%s from %s (python %s)' % (
         virtstrap_dist, virtstrap_dist.location, sys.version[:3])
 except pkg_resources.DistributionNotFound:
-    # when running pip.py without installing
     version=None
 
-def create_parser(command_name=None, args=None):
-    """ArgumentParser Factory Method"""
-    command_name = command_name or "COMMAND"
-    if command_name == "help":
-        command_name = "COMMAND"
-    args = args or []
-    usage_list = ["%(prog)s", command_name]
-    args = args
-    if args:
-        args_string = " ".join(args)
-        usage_list.append(args_string)
-    usage_list.append("[OPTIONS]")
-    usage = " ".join(usage_list)
+def create_base_parser():
+    """This is the basic parser that all parsers will inherit."""
     parser = ArgumentParser(
-        usage=usage,
+        add_help=False
     )
-    parser.add_argument('--version', action='version', version=version)
-    parser.add_argument('-v', '--verbosity', dest='verbosity', 
+    global_group = parser.add_argument_group('global options')
+    global_group.add_argument('--version', action='version', version=version)
+    global_group.add_argument('-v', '--verbosity', dest='verbosity', 
             action='store', type=int, default=2,
             metavar='LVL',
             help='set verbosity level. [0, 1, 2, 3]')
-    parser.add_argument('-l', '--log', dest='log_file', metavar='FILE',
+    global_group.add_argument('-l', '--log', dest='log_file', metavar='FILE',
             action='store', default=constants.LOG_FILE,
             help='log file')
-    parser.add_argument('--virtstrap-dir', dest='virtstrap_dir', 
+    global_group.add_argument('--virtstrap-dir', dest='virtstrap_dir', 
             action='store', default=constants.VIRTSTRAP_DIR,
             metavar='DIR',
-            help='the directory to install virtstrap')
-    parser.add_argument('--no-colored-output', dest='no_colored_output',
+            help='the directory for the virtual environment')
+    global_group.add_argument('--no-colored-output', dest='no_colored_output',
             action='store_true', default=False,
             help='do not use output colors')
+    global_group.add_argument('-c', '--config-file', dest='config_file', 
+            action='store', default=None,
+            help='specify a configuration file')
     return parser
 
+def parser_from_commands(commands):
+    """Creates a parser from all the passed in commands"""
+    base_parser = create_base_parser()
+    top_parser = ArgumentParser(
+        parents=[base_parser]
+    )
+    subparsers = top_parser.add_subparsers(help='Commands',
+            metavar='command', dest='command')
+    for command_name, command in commands:
+        command_parser = command.parser
+        if not isinstance(command_parser, ArgumentParser):
+            logger.error('%s does not define parser with argparse. '
+                    'It will not be included in commands' % command_name)
+        subparsers.add_parser(command_name,
+                help=command.description,
+                add_help=False,
+                parents=[base_parser, command.parser]
+            )
+    return top_parser

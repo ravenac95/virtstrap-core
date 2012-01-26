@@ -1,9 +1,10 @@
 from virtstrap.log import logger
-from virtstrap.options import create_parser
+from argparse import ArgumentParser
 
 class Command(object):
     name = None
     args = None
+    parser = ArgumentParser()
     description = None
     options = None
 
@@ -14,15 +15,9 @@ class Command(object):
         self.options = []
         self.logger = logger
 
-    def execute(self, command_args, base_options):
-        parser = create_parser(self.name, self.args)
-        parser.add_options(self.options)
-        self.handle_parser(parser)
-
-        cli_options, cli_args = parser.parse_args(command_args)
-        
+    def execute(self, **options):
         try:
-            self.run(*cli_args, **cli_options.__dict__)
+            self.run(**options)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
