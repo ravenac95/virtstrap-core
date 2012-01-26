@@ -10,7 +10,6 @@ import sys
 
 # Installation requirements
 REQUIREMENTS = [
-    'PasteScript>=1.3', 
     'virtualenv',
     'pyyaml',
 ]
@@ -32,14 +31,10 @@ setup(
     platforms='*nix',
     install_requires=REQUIREMENTS,
     entry_points={
-            'paste.paster_create_template': [
-                'virtstrap_basic = virtstrap.entry.template:VirtStrapBasicTemplate', 
-                'virtstrap_ipython = virtstrap.entry.template:VirtStrapIPythonTemplate',
-            ],
-            'console_scripts': [
-                'vstrap = virtstrap.runner:main',
-            ]
-        },
+        'console_scripts': [
+            'vstrap = virtstrap.runner:main',
+        ],
+    },
     classifiers = [
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
