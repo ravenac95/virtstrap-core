@@ -54,3 +54,6 @@ vs.env
 # Misc
 *.bak
 *.tmp
+
+# Sphinx
+docs/_build
