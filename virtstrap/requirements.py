@@ -1,8 +1,10 @@
+from urlparse import urlparse
 from virtstrap.exceptions import RequirementsConfigError
 
 class RequirementSet(object):
     @classmethod
-    def from_raw_data(cls, requirements_list):
+    def from_raw_data(cls, raw_data):
+        process_raw_requirements(raw_data)
         return cls()
 
     def set_requirements(self, requirements_list):
@@ -48,7 +50,10 @@ class RequirementSet(object):
                             prefix = '-e '
                         pip_lines.append('%s%s#egg=%s' % (prefix, 
                             specification, requirement_name))
-        return "\n".join(pip_lines)
+        return '\n'.join(pip_lines)
+
+def process_raw_requirements(raw_data):
+    pass
 
 class Requirement(object):
     def __init__(self, name, version=''):
@@ -57,6 +62,14 @@ class Requirement(object):
 
     def to_pip_str(self):
         return '%s%s' % (self._name, self._version)
+
+class URLRequirement(Requirement):
+    def __init__(self, name, url):
+        self._url = url
+        super(URLRequirement, self).__init__(name)
+    
+    def to_pip_str(self):
+        return '%s#egg=%s' % (self._url, self._name)
 
 class VCSRequirement(Requirement):
     def __init__(self, name, url, at=None, editable=False):
@@ -74,6 +87,65 @@ class VCSRequirement(Requirement):
         postfix = postfix_template % self._name
         return '%s%s%s' % (prefix, self._url, postfix)
 
+class RequirementsProcessor(object):
+    """Turns data from configuration into Requirement objects"""
+    requirement_types = {
+        'basic': Requirement,
+        'url': URLRequirement,
+        'vcs': VCSRequirement,
+    }
 
+    def __init__(self, requirement_types=None):
+        self._requirement_types = requirement_types or self.requirement_types
 
+    def to_requirements(self, raw_list):
+        requirements = []
+        
+        for raw_requirement in raw_list:
+            if isinstance(raw_requirement, str):
+                requirement = self.create_requirement('basic', raw_requirement)
+            elif isinstance(raw_requirement, dict):
+                requirement = self._handle_requirement_dict(raw_requirement)
+            else:
+                raise RequirementsConfigError('Unknown requirement format')
+            requirements.append(requirement)
+        return requirements
 
+    def _handle_requirement_dict(self, raw_requirement):
+        """Handle when requirement is in dict form"""
+        keys = raw_requirement.keys() 
+        # Check that there is one and only one key
+        if len(keys) != 1:
+            raise RequirementsConfigError('Requirement error. '
+                'Multiple keys encountered for one requirement.')
+        requirement_name = keys[0]
+        requirement_data = raw_requirement[requirement_name]
+        if isinstance(requirement_data, str):
+            spec_type = self.determine_spec_type(requirement_data)
+            return self.create_requirement(spec_type, requirement_name,
+                    requirement_data)
+        elif isinstance(requirement_data, list):
+            spec = requirement_data[0]
+            spec_type = self.determine_spec_type(spec)
+            options = {}
+            for option in requirement_data[1:]:
+                opt_keys = option.keys()
+                option_name = opt_keys[0]
+                options[option_name] = option[option_name]
+            return self.create_requirement(spec_type, requirement_name,
+                    spec, **options)
+        raise RequirementsConfigError('Unknown requirement format')
+
+    def create_requirement(self, requirement_type, *args, **kwargs):
+        ReqClass = self._requirement_types.get(requirement_type)
+        return ReqClass(*args, **kwargs)
+
+    def determine_spec_type(self, spec):
+        """A very naive way to determine the type of requirement"""
+        parsed_spec = urlparse(spec)
+        scheme = parsed_spec.scheme
+        if not scheme:
+            return 'basic'
+        if '+' in scheme or 'git' in scheme:
+            return 'vcs'
+        return 'url'
