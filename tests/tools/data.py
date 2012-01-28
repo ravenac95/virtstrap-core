@@ -18,3 +18,4 @@ def random_string(length, chars=ALL_CHARS):
         c = random.choice(chars)
         array.append(c)
     return "".join(array)
+
