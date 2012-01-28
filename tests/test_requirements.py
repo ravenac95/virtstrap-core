@@ -19,13 +19,10 @@ def test_initialize_processor():
     req_set = RequirementSet()
 
 def test_initialize_from_data():
-    req_set = RequirementSet.from_raw_data([])
+    req_set = RequirementSet.from_config_data([])
     assert isinstance(req_set, RequirementSet)
 
 class TestRequirementSet(object):
-    def setup(self):
-        self.req_set = RequirementSet()
-
     def test_set_to_pip_str(self):
         # Define a requirements list
         requirements_list = [
@@ -44,8 +41,8 @@ class TestRequirementSet(object):
             requests>=0.8
             -e git+https://something.com/mitsuhiko/jinja2.git#egg=jinja2
         """).strip()
-        self.req_set.set_requirements(requirements_list)
-        pip_str = self.req_set.to_pip_str()
+        req_set = RequirementSet.from_config_data(requirements_list)
+        pip_str = req_set.to_pip_str()
         assert pip_str == expected_string
 
     @raises(RequirementsConfigError)
@@ -54,8 +51,8 @@ class TestRequirementSet(object):
         requirements_list = [
             {'somereq': 'version', 'other': 'version'},
         ]
-        self.req_set.set_requirements(requirements_list)
-        self.req_set.to_pip_str()
+        req_set = RequirementSet.from_config_data(requirements_list)
+        req_set.to_pip_str()
 
 class TestRequirementsProcessor(object):
     def setup(self):

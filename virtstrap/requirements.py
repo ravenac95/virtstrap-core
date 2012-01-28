@@ -3,57 +3,32 @@ from virtstrap.exceptions import RequirementsConfigError
 
 class RequirementSet(object):
     @classmethod
-    def from_raw_data(cls, raw_data):
-        process_raw_requirements(raw_data)
-        return cls()
+    def from_config_data(cls, raw_data):
+        requirements = process_raw_requirements(raw_data)
+        requirement_set = cls()
+        requirement_set.extend(requirements)
+        return requirement_set
+
+    def __init__(self):
+        self._requirements = []
+
+    def extend(self, requirements):
+        self._requirements.extend(requirements)
 
     def set_requirements(self, requirements_list):
-        self._requirements_list = requirements_list
+        self._requirements = requirements_list
 
     def to_pip_str(self):
         # Process all of the requirements in the 
         # previously set requirements list
         pip_lines = []
-        for requirement in self._requirements_list:
-            if isinstance(requirement, str):
-                # Requirement is a simple string
-                pip_lines.append('%s' % requirement)
-            elif isinstance(requirement, dict):
-                # Requirement is in a dict format
-                keys = requirement.keys()
-                # It may only have a single key which is the name of the 
-                # python module
-                if len(keys) != 1:
-                    raise RequirementsConfigError('Requirement error. '
-                        'Multiple keys encountered for one requirement.')
-                requirement_name = keys[0]
-                # Get the rest of the data for the requirement
-                requirement_data = requirement[requirement_name]
-                if isinstance(requirement_data, str):
-                    # If the data is a string it is a version specification
-                    # or vcs link
-                    pip_lines.append('%s%s' % (requirement_name, 
-                        requirement_data))
-                elif isinstance(requirement_data, list):
-                    # If it is a list.
-                    # The first element is the version specification or vcs link
-                    specification = requirement_data[0]
-                    # all other elements are options
-                    options = {}
-                    for option in requirement_data[1:]:
-                        opt_keys = option.keys()
-                        option_name = opt_keys[0]
-                        options[option_name] = option[option_name]
-                    if '+' in specification:
-                        prefix = ''
-                        if options.get('editable'):
-                            prefix = '-e '
-                        pip_lines.append('%s%s#egg=%s' % (prefix, 
-                            specification, requirement_name))
+        for requirement in self._requirements:
+            pip_lines.append(requirement.to_pip_str())
         return '\n'.join(pip_lines)
 
 def process_raw_requirements(raw_data):
-    pass
+    processor = RequirementsProcessor()
+    return processor.to_requirements(raw_data)
 
 class Requirement(object):
     def __init__(self, name, version=''):
