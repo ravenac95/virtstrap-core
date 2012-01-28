@@ -16,17 +16,17 @@ requirements:
 """
 
 def test_initialize_processor():
-    processor = RequirementsProcessor()
+    processor = RequirementSet()
 
 def test_initialize_from_data():
-    processor = RequirementsProcessor.from_list([])
-    assert isinstance(processor, RequirementsProcessor)
+    processor = RequirementSet.from_raw_data([])
+    assert isinstance(processor, RequirementSet)
 
-class TestRequirementsProcessor(object):
-    """RequirementsProcessor test without mocks"""
+class TestRequirementSet(object):
+    """RequirementSet test without mocks"""
 
     def setup(self):
-        self.processor = RequirementsProcessor()
+        self.processor = RequirementSet()
 
     def test_create_requirements_file(self):
         # Define a requirements list
@@ -40,23 +40,17 @@ class TestRequirementsProcessor(object):
             ]}
         ]
         # Define the expected created file
-        expected_file = textwrap.dedent("""
+        expected_string = textwrap.dedent("""
             ipython
             werkzeug==0.8
             requests>=0.8
             -e git+https://github.com/mitsuhiko/jinja2.git#egg=jinja2
-        """)
+        """).strip()
         self.processor.set_requirements(requirements_list)
         
-        fake_file = StringIO()
+        pip_str = self.processor.to_pip_str()
 
-        self.processor.create_requirements_file(file=fake_file)
-
-        fake_file_value = fake_file.getvalue()
-        stripped_fake_file = fake_file_value.strip()
-        stripped_expected_file = expected_file.strip()
-
-        assert stripped_fake_file == stripped_expected_file
+        assert pip_str == expected_string
 
     @raises(RequirementsConfigError)
     def test_badly_configured_requirements(self):
@@ -68,7 +62,7 @@ class TestRequirementsProcessor(object):
 
         fake_file = fudge.Fake().is_a_stub()
 
-        self.processor.create_requirements_file(file=fake_file)
+        self.processor.to_pip_str()
 
 def test_initialize_requirement_object():
     requirement = Requirement('somename')

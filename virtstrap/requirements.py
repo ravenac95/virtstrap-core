@@ -1,20 +1,21 @@
 from virtstrap.exceptions import RequirementsConfigError
 
-class RequirementsProcessor(object):
+class RequirementSet(object):
     @classmethod
-    def from_list(cls, requirements_list):
+    def from_raw_data(cls, requirements_list):
         return cls()
 
     def set_requirements(self, requirements_list):
         self._requirements_list = requirements_list
 
-    def create_requirements_file(self, file=None):
+    def to_pip_str(self):
         # Process all of the requirements in the 
         # previously set requirements list
+        pip_lines = []
         for requirement in self._requirements_list:
             if isinstance(requirement, str):
                 # Requirement is a simple string
-                file.write('%s\n' % requirement)
+                pip_lines.append('%s' % requirement)
             elif isinstance(requirement, dict):
                 # Requirement is in a dict format
                 keys = requirement.keys()
@@ -29,7 +30,8 @@ class RequirementsProcessor(object):
                 if isinstance(requirement_data, str):
                     # If the data is a string it is a version specification
                     # or vcs link
-                    file.write('%s%s\n' % (requirement_name, requirement_data))
+                    pip_lines.append('%s%s' % (requirement_name, 
+                        requirement_data))
                 elif isinstance(requirement_data, list):
                     # If it is a list.
                     # The first element is the version specification or vcs link
@@ -41,10 +43,12 @@ class RequirementsProcessor(object):
                         option_name = opt_keys[0]
                         options[option_name] = option[option_name]
                     if '+' in specification:
+                        prefix = ''
                         if options.get('editable'):
-                            file.write('-e ')
-                        file.write('%s#egg=%s\n' % (specification, 
-                            requirement_name))
+                            prefix = '-e '
+                        pip_lines.append('%s%s#egg=%s' % (prefix, 
+                            specification, requirement_name))
+        return "\n".join(pip_lines)
 
 class Requirement(object):
     def __init__(self, name, version=''):
