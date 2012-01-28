@@ -28,7 +28,7 @@ class TestRequirementSet(object):
     def setup(self):
         self.processor = RequirementSet()
 
-    def test_create_requirements_file(self):
+    def test_set_to_pip_str(self):
         # Define a requirements list
         requirements_list = [
             'ipython',
