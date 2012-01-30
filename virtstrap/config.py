@@ -76,7 +76,6 @@ class VirtstrapConfig(object):
                         compiled_data = section_data[:]
                     else:
                         compiled_data = section_data
-        print(self._profiles)
         return compiled_data
 
     def process_section(self, section_name, process_function):
