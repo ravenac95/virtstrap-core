@@ -4,6 +4,7 @@ from virtstrap.log import logger, setup_logger
 from virtstrap.loaders import CommandLoader
 from virtstrap.commands import registry
 from virtstrap.registry import CommandDoesNotExist
+from virtstrap.config import VirtstrapConfig
 
 EXIT_FAIL = 1
 EXIT_OK = 0
@@ -18,11 +19,11 @@ class VirtstrapRunner(object):
         if not args:
             args = sys.argv[1:]
         cli_args = parser.parse_args(args=args)
-        self.handle_global_options(cli_args)
+        config = self.handle_global_options(cli_args)
         command = cli_args.command
         # Run the command
         try:
-            exit_code = self.run_command(command, cli_args)
+            exit_code = self.run_command(command, config, cli_args)
         except CommandDoesNotExist:
             exit_code = EXIT_FAIL
             logger.debug('Unknown command "%s"' % command)
@@ -33,6 +34,16 @@ class VirtstrapRunner(object):
     def handle_global_options(self, cli_args):
         setup_logger(cli_args.verbosity, 
                 cli_args.no_colored_output)
+        return self.load_configuration(cli_args)
+
+    def load_configuration(self, cli_args):
+        try:
+            config_file_obj = open(cli_args.config_file)
+        except IOError:
+            config_file_obj = ''
+        config = VirtstrapConfig.from_string(config_file_obj, 
+                profiles=cli_args.profiles)
+        return config
 
     def load_commands(self):
         """Tell loader to load commands"""
@@ -42,11 +53,11 @@ class VirtstrapRunner(object):
     def create_parser(self):
         return registry.create_cli_parser()
 
-    def run_command(self, name, cli_args):
+    def run_command(self, name, config, cli_args):
         """Load command from virtstrap.commands"""
         logger.debug('Command "%s" chosen' % name)
         options = cli_args.__dict__
-        return registry.run(name, **options)
+        return registry.run(name, config, **options)
 
 
 def main(args=None):

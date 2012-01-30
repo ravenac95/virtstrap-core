@@ -15,9 +15,9 @@ class Command(object):
         self.options = []
         self.logger = logger
 
-    def execute(self, **options):
+    def execute(self, config, **options):
         try:
-            self.run(**options)
+            self.run(config, **options)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
