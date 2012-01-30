@@ -75,6 +75,7 @@ class RequirementsProcessor(object):
 
     def to_requirements(self, raw_list):
         requirements = []
+        raw_list = raw_list or []
         
         for raw_requirement in raw_list:
             if isinstance(raw_requirement, str):
