@@ -1,5 +1,5 @@
 """
-VirtStrap
+Virtstrap
 =========
 
 A bootstrapping mechanism for virtualenv, buildout, and shell scripts.
