@@ -17,6 +17,9 @@ try:
 except pkg_resources.DistributionNotFound:
     version=None
 
+def list_str(string):
+    return map(lambda a: a.strip(), string.split(','))
+
 def create_base_parser():
     """This is the basic parser that all parsers will inherit."""
     parser = ArgumentParser(
@@ -39,8 +42,11 @@ def create_base_parser():
             action='store_true', default=False,
             help='do not use output colors')
     global_group.add_argument('-c', '--config-file', dest='config_file', 
-            action='store', default=None,
+            action='store', default='VEfile',
             help='specify a configuration file')
+    global_group.add_argument('-p', '--profiles', dest='profiles', 
+            action='store', help='specify a profile', type=list_str,
+            default='development')
     return parser
 
 def parser_from_commands(commands):
