@@ -8,7 +8,16 @@ Recommended Method
 
 Pip is the recommended method for installing virtstrap. Simply do::
 
-    $ pip install virtstrap
+    $ pip install virtstrap==dev
+
+.. admonition:: Do not install previous versions
+
+    Please do not install any previous versions of virtstrap. This
+    development documentation does not cover any of those versions 
+    and starting with 0.3.0 the usage has changed significantly. The
+    older versions are only being supported for internal use and 
+    historical reasons. Eventually those will be removed from PyPI
+    to avoid confusion.
 
 If you only have easy_install, you should install pip before continuing and
 execute the command above.

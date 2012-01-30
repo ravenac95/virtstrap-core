@@ -9,8 +9,8 @@ Virtstrap: Simple, Repeatable Environments
 virtstrap makes your life easier, by providing a simple and repeatable
 bootstrapping process. It was inspired by pip+virtualenv and buildout, but
 seeks to create a unified and standard way that won't scare away any new 
-python developers and will make old pythonista live's a bit easier. All with
-the wonderful convenience of the MIT License.
+python developers and will make old pythonista lives a bit easier. All with
+the wonderful convenience of the MIT License. 
 
 With virtstrap, setting up your development environment is as simple as this::
     
@@ -19,14 +19,22 @@ With virtstrap, setting up your development environment is as simple as this::
 Current Features
 ----------------
 
-- Creates a virtualenv inside ``.vs.env`` in your root directory
+- Provides a standard location for virtualenv
+- Provide a quick and simple way to activate the current environment
+
+Future Features
+---------------
+
+- Provide a simple plugin system
+- Generate a requirements file much like a Gemfile.lock
+- Allow for arbitrary environment variables to be set
 
 User Guide
 ----------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
     
-   install
-   quickstart
+    install
+    quickstart
 
