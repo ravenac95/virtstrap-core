@@ -2,3 +2,4 @@ nose
 virtualenv
 pyyaml
 fudge
+pypiserver

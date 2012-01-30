@@ -1,4 +1,5 @@
 import os
+import urllib2
 from tests.tools import *
 
 def test_temp_directory():
@@ -23,3 +24,8 @@ def test_temp_directory_write_file():
         verify_file = open(test_file_path)
         verify_data = verify_file.read()
         assert random_data == verify_data
+
+def test_fake_pypi():
+    packages_directory = 'tests/fixture/packages'
+    with temp_pip_index(packages_directory) as index_url:
+        urllib2.urlopen(index_url)
