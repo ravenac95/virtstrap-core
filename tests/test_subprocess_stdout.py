@@ -1,7 +1,8 @@
 import fudge
 from cStringIO import StringIO
 from tests import fixture_path
-from virtstrap.lib.caller import call, SubprocessOutputCollector
+from virtstrap.lib.caller import (call, SubprocessOutputCollector, 
+                    LogOutputStream)
 
 def test_capture_make_output_scripts():
     """Tests both make_output scripts"""
@@ -41,7 +42,7 @@ def test_subprocess_output_collector_collects_line():
 
 @fudge.test
 def test_subprocess_output_collector_collects_many_lines():
-    """Test the creation of the output collector"""
+    """Test the creation of the SubprocessOutputCollector"""
     fake_stdout = StringIO()
     fake_stdout.write('hello\n')
     fake_stdout.write('world\n')
@@ -54,3 +55,36 @@ def test_subprocess_output_collector_collects_many_lines():
     collector = SubprocessOutputCollector(stdout=fake_stdout,
             output_stream=fake_output_stream)
     collector.collect()
+
+@fudge.test
+def test_log_output_stream():
+    """Test that the output stream makes the calls we expect"""
+    fake_logger = fudge.Fake()
+    fake_logger.expects('info').with_args('hello')
+    log_output_stream = LogOutputStream(logger=fake_logger)
+    log_output_stream.write('hello')
+
+
+@fudge.test
+def test_log_output_stream_with_different_level():
+    """Test that the output stream logs to a different level"""
+    fake_logger = fudge.Fake()
+    fake_logger.expects('error').with_args('hello')
+    log_output_stream = LogOutputStream(level='error', logger=fake_logger)
+    log_output_stream.write('hello')
+
+@fudge.patch('virtstrap.lib.caller.virtstrap_logger')
+def test_integrated_call(fake_logger):
+    """Integrates call, SubprocessOutputCollector, and LogOutputStream"""
+    # initialize the fake logger it's the only fake we need
+    alphas = 'abcdef\n'
+    nums = '123456\n'
+    fake_logger.expects('info').with_args(alphas)
+    fake_logger.next_call().with_args(nums)
+    fake_logger.next_call().with_args(alphas)
+    fake_logger.next_call().with_args(nums)
+    
+    fake_output_bin = fixture_path('make_output.py')
+    return_code = call(['python', fake_output_bin])
+
+    
