@@ -3,7 +3,7 @@ import virtualenv
 import sys
 import tempfile
 from argparse import ArgumentParser
-from subprocess import call
+from virtstrap.lib.caller import call
 from virtstrap import commands
 from virtstrap import constants
 from virtstrap.lib.command import Command
