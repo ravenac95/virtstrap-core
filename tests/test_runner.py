@@ -2,15 +2,15 @@
 Runner Tests
 ============
 
-Very high level tests for the virtstrap runner
+Very high level tests for the virtstrap runner. 
 """
 import os
 import sys
 import fudge
 from cStringIO import StringIO
-from virtstrap.runner import VirtstrapRunner
 from tests.tools import *
 from nose.tools import raises
+from virtstrap.runner import VirtstrapRunner
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '../'))
@@ -47,9 +47,9 @@ class TestVirtstrapRunner(object):
         self.runner = None
 
     @fudge.patch('sys.stderr')
-    def test_run_no_args(self, fake_sys_stderr):
+    def test_run_no_args(self, fake_stderr):
         """Run the main command line utility with no args"""
-        fake_sys_stderr.is_a_stub() # just want to silence stderr
+        fake_stderr.is_a_stub() # just want to silence stderr
         try:
             return_code = self.runner.main()
         except SystemExit, e:
@@ -77,6 +77,10 @@ class TestVirtstrapRunner(object):
             quick_activate_path = os.path.join(temp_directory, 'quickactivate.sh')
             assert os.path.exists(virtual_environment_path) == True
             assert os.path.exists(quick_activate_path) == True
+            # Make sure quickactivate source's the activate script
+            quick_activate = open(quick_activate_path)
+            quick_activate_text = quick_activate.read()
+            assert 'source' in quick_activate_text.strip()
             assert return_code == 0
 
     def test_run_init_to_different_directory(self):
@@ -132,7 +136,7 @@ class TestVirtstrapRunner(object):
                     assert package in requirements_string
                 assert return_code == 0
 
-    def test_run_init_with_a_config_using_different_profile(self):
+    def test_run_init_using_different_profile(self):
         """Run the init command using a different profile"""
         profiles = 'production'
         test_args = ['init', '--profiles=%s' % profiles]

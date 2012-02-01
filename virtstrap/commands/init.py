@@ -28,8 +28,8 @@ class InitializeCommand(Command):
 
     def run(self, config, **options):
         self.create_virtualenv(config, options)
-        self.build_requirements(config, options)
         self.create_quickactivate_script(config, options)
+        self.build_requirements(config, options)
 
     def create_virtualenv(self, config, options):
         """Create virtual environment in the virtstrap directory"""
@@ -66,7 +66,8 @@ class InitializeCommand(Command):
                 self.run_pip_install(virtstrap_bin_path, temp_reqs_path)
             except InstallationError:
                 # Exit if any problems occur during installation
-                self.logger.error('Installation could not be completed. Aborting')
+                self.logger.error('Installation could not be completed. '
+                        'Aborting')
                 sys.exit(2)
             finally:
                 logger.debug('Removing temporary requirements file')
@@ -90,7 +91,7 @@ class InitializeCommand(Command):
         """Create a quickactivate script"""
         self.logger.info('Creating quick activate script')
         quick_activate = open('./quickactivate.sh', 'w')
-        quick_activate.write("test")
+        quick_activate.write("source")
         quick_activate.close()
 
 commands.register(InitializeCommand)
