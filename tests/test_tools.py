@@ -26,6 +26,6 @@ def test_temp_directory_write_file():
         assert random_data == verify_data
 
 def test_fake_pypi():
-    packages_directory = 'tests/fixture/packages'
+    packages_directory = 'tests/fixtures/packages'
     with temp_pip_index(packages_directory) as index_url:
         urllib2.urlopen(index_url)

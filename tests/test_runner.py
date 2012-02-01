@@ -15,7 +15,7 @@ from virtstrap.runner import VirtstrapRunner
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(CURRENT_DIR, '../'))
 PACKAGES_DIR = os.path.abspath(os.path.join(PROJECT_DIR,
-                    'tests/fixture/packages'))
+                    'tests/fixtures/packages'))
 
 TEST_CONFIG = """
 requirements:
