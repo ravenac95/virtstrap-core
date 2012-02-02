@@ -1,6 +1,7 @@
 import os
 import urllib2
 from tests.tools import *
+from tests import fixture_path
 
 def test_temp_directory():
     """Test a temp directory"""
@@ -29,3 +30,14 @@ def test_fake_pypi():
     packages_directory = 'tests/fixture/packages'
     with temp_pip_index(packages_directory) as index_url:
         urllib2.urlopen(index_url)
+
+@hide_subprocess_stdout
+def test_subprocess_popen_proxy():
+    import subprocess
+    process = subprocess.Popen(['echo', 'hello'])
+    process.wait()
+    process_stdout = getattr(process, 'stdout', None)
+    output = process_stdout.read()
+    assert process_stdout is not None
+    assert output == 'hello\n'
+    
