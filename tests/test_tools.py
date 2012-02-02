@@ -43,3 +43,7 @@ def test_subprocess_popen_proxy():
     assert process_stdout is not None
     assert output == 'hello\n'
     
+def test_dict_to_object():
+    obj = dict_to_object(dict(a=1,b=2))
+    assert obj.a == 1
+    assert obj.b == 2

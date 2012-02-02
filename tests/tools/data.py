@@ -19,3 +19,6 @@ def random_string(length, chars=ALL_CHARS):
         array.append(c)
     return "".join(array)
 
+def dict_to_object(d):
+    return type('DictAsObject', (object,), d)
+    
