@@ -1,5 +1,5 @@
-from virtstrap.log import logger
 from argparse import ArgumentParser
+from virtstrap.log import logger
 
 class Command(object):
     name = None
@@ -16,6 +16,7 @@ class Command(object):
         self.logger = logger
 
     def execute(self, config, **options):
+        self.logger.info('Running "%s" command' % self.name)
         try:
             self.run(config, **options)
         except:
@@ -23,10 +24,6 @@ class Command(object):
                     self.__class__.__name__)
             return 2
         return 0
-
-    def handle_parser(self, parser):
-        """Special override to do low-level parser handling"""
-        pass
 
     def run(self, *args, **options):
         raise NotImplementedError('This command does nothing')
