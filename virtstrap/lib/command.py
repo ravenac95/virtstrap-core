@@ -25,5 +25,5 @@ class Command(object):
             return 2
         return 0
 
-    def run(self, *args, **options):
+    def run(self, config, **options):
         raise NotImplementedError('This command does nothing')
