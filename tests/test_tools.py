@@ -1,5 +1,6 @@
 import os
 import urllib2
+from nose.plugins.attrib import attr
 from tests.tools import *
 from tests import fixture_path
 
@@ -26,6 +27,7 @@ def test_temp_directory_write_file():
         verify_data = verify_file.read()
         assert random_data == verify_data
 
+@attr('slow')
 def test_fake_pypi():
     packages_directory = 'tests/fixture/packages'
     with temp_pip_index(packages_directory) as index_url:

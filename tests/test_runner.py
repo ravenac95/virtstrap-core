@@ -69,6 +69,7 @@ class TestVirtstrapRunner(object):
             assert e.code == 0
         assert system_exit == True, "Runner didn't issue a system exit"
 
+    @attr('slow')
     def test_run_init(self):
         """Run the init command"""
         test_args = ['init']
