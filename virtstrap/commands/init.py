@@ -1,9 +1,9 @@
 import os
-import virtualenv
 import sys
 import tempfile
 from argparse import ArgumentParser
 from subprocess import call
+import virtualenv
 from virtstrap import commands
 from virtstrap import constants
 from virtstrap.lib.command import Command
@@ -24,7 +24,7 @@ class InstallationError(Exception):
 class InitializeCommand(Command):
     name = 'init'
     parser = parser
-    description = 'Bootstraps a virtstrap virtual environment'
+    description = 'Bootstraps a virtstrap virtual environment.'
 
     def run(self, config, **options):
         self.create_virtualenv(config, options)
