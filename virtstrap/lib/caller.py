@@ -18,6 +18,9 @@ class LogOutputStream(object):
     def write(self, string):
         # Get the log method based on level
         log_method = getattr(self._logger, self._level)
+        # Loggers don't expect the line
+        if string.endswith('\n'):
+            string = string[:-1]
         log_method(string)
 
 class SubprocessOutputCollector(object):

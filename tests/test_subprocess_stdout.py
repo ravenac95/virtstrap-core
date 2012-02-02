@@ -77,8 +77,8 @@ def test_log_output_stream_with_different_level():
 def test_integrated_call(fake_logger):
     """Integrates call, SubprocessOutputCollector, and LogOutputStream"""
     # initialize the fake logger it's the only fake we need
-    alphas = 'abcdef\n'
-    nums = '123456\n'
+    alphas = 'abcdef'
+    nums = '123456'
     fake_logger.expects('info').with_args(alphas)
     fake_logger.next_call().with_args(nums)
     fake_logger.next_call().with_args(alphas)
