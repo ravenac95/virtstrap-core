@@ -10,6 +10,7 @@ import fudge
 from cStringIO import StringIO
 from tests.tools import *
 from nose.tools import raises
+from nose.plugins.attrib import attr
 from virtstrap.runner import VirtstrapRunner
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -83,6 +84,7 @@ class TestVirtstrapRunner(object):
             assert 'source' in quick_activate_text.strip()
             assert return_code == 0
 
+    @attr('slow')
     def test_run_init_to_different_directory(self):
         """Run the init command with a different virtstrap directory"""
         env_dir = 'envdir'
@@ -94,7 +96,8 @@ class TestVirtstrapRunner(object):
             assert os.path.exists(virtual_environment_path) == True
             assert os.path.exists(quick_activate_path) == True
             assert return_code == 0
-
+    
+    @attr('slow')
     @hide_subprocess_stdout
     def test_run_init_with_a_config(self):
         """Run the init command with a VEfile in the directory"""
@@ -116,6 +119,7 @@ class TestVirtstrapRunner(object):
                     assert package in requirements_string
                 assert return_code == 0
 
+    @attr('slow')
     @hide_subprocess_stdout
     def test_run_init_with_a_config_using_custom_config_file(self):
         """Run the init command with a custom file in the directory"""
@@ -138,6 +142,7 @@ class TestVirtstrapRunner(object):
                     assert package in requirements_string
                 assert return_code == 0
 
+    @attr('slow')
     @hide_subprocess_stdout
     def test_run_init_using_different_profile(self):
         """Run the init command using a different profile"""
