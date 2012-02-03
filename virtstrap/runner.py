@@ -10,7 +10,7 @@ EXIT_FAIL = 1
 EXIT_OK = 0
 
 class VirtstrapRunner(object):
-    """Routes commands to different commands"""
+    """Routes command line to different commands"""
     def main(self, args=None):
         """Handles execution through command line interface"""
         # Load all of the available commands
