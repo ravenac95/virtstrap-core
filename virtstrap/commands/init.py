@@ -100,22 +100,4 @@ class InitializeCommand(Command):
         quick_activate.write("source")
         quick_activate.close()
 
-class InitializeCommander(Command):
-    name = 'init'
-    parser = parser
-    description = 'Bootstraps a virtstrap virtual environment.'
-
-    def run(self, config, **options):
-        # Create the virtualenv
-        self.create_virtualenv(config, options)
-        # Load the project environment
-        env = self.load_environment()
-        # Create quickactivate script
-        self.create_quickactivate_script(env)
-        # Call the new virtualenv's vstrap install
-        # this allows us to use the virtualenv's python version for any 
-        # necessary compilation
-        vstrap_bin = env.get_bin_path('vstrap')
-        call([vstrap_bin, 'install'])
-
 commands.register(InitializeCommand)
