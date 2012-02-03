@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from virtstrap.log import logger
 
+__all__ = ['Command']
+
 class Command(object):
     name = None
     args = None

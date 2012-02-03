@@ -4,7 +4,7 @@ Test Base Command
 """
 import fudge
 from nose.tools import *
-from virtstrap.lib.command import Command
+from virtstrap.basecommand import Command
 
 class FakeCommand(Command):
     name = 'fake'

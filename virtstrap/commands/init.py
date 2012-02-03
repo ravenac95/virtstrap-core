@@ -6,7 +6,6 @@ from subprocess import call
 import virtualenv
 from virtstrap import commands
 from virtstrap import constants
-from virtstrap.lib.command import Command
 from virtstrap.requirements import RequirementSet
 
 parser = ArgumentParser()
@@ -21,7 +20,7 @@ def process_requirements_config(raw_requirements):
 class InstallationError(Exception):
     pass
 
-class InitializeCommand(Command):
+class InitializeCommand(commands.Command):
     name = 'init'
     parser = parser
     description = 'Bootstraps a virtstrap virtual environment.'
