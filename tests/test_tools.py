@@ -4,14 +4,27 @@ from nose.plugins.attrib import attr
 from tests.tools import *
 from tests import fixture_path
 
+def test_in_directory():
+    """Test change CWD to a specific directory"""
+    basic_project_dir = fixture_path('sample_project')
+    with in_directory(basic_project_dir):
+        assert basic_project_dir == os.path.abspath('.')
+    assert basic_project_dir != os.path.abspath('.')
+
 def test_temp_directory():
-    """Test a temp directory"""
+    """Test temp directory correctly deletes"""
+    with temp_directory() as temp_dir:
+        pass
+    assert os.path.exists(temp_dir) == False
+
+def test_in_temp_directory():
+    """Test CWD to temp directory"""
     with in_temp_directory() as temp_directory:
         assert os.getcwd() == temp_directory
     assert os.path.exists(temp_directory) == False
 
-def test_temp_directory_write_file():
-    """Test temp directory and create file there"""
+def test_in_temp_directory_write_file():
+    """Test CWD to temp directory and create file there"""
     with in_temp_directory() as temp_directory:
         # Create a test file in the directory
         test_filename = "test_file.txt"
