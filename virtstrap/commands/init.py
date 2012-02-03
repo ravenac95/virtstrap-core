@@ -10,7 +10,7 @@ from virtstrap.lib.command import Command
 from virtstrap.requirements import RequirementSet
 
 parser = ArgumentParser()
-parser.add_argument('PROJECT_DIR',
+parser.add_argument('project_dir', metavar='PROJECT_DIR',
         help="project's root directory",
         nargs='?', default='.')
 
@@ -33,10 +33,12 @@ class InitializeCommand(Command):
 
     def create_virtualenv(self, config, options):
         """Create virtual environment in the virtstrap directory"""
-        virtstrap_dir_relpath = options.get('virtstrap_dir')
-        virtstrap_dir = os.path.abspath(virtstrap_dir_relpath)
-        self.logger.info('Creating virtualenv in %s' % virtstrap_dir)
-        virtualenv.create_environment(virtstrap_dir,
+        virtstrap_dir = options.get('virtstrap_dir')
+        # Project Directory
+        virtstrap_dir_abspath = os.path.abspath(os.path.join(
+                options['project_dir'], virtstrap_dir))
+        self.logger.info('Creating virtualenv in %s' % virtstrap_dir_abspath)
+        virtualenv.create_environment(virtstrap_dir_abspath,
                 site_packages=False,
                 prompt="(%s) " % 'proj')
 
@@ -57,8 +59,10 @@ class InitializeCommand(Command):
             temp_reqs_file.close()
             
             # Get new path data
-            virtstrap_dir = os.path.abspath(options.get('virtstrap_dir'))
-            virtstrap_bin_path = os.path.join(virtstrap_dir, 'bin')
+            virtstrap_dir = options.get('virtstrap_dir')
+            virtstrap_dir_abspath = os.path.abspath(os.path.join(
+                    options['project_dir'], virtstrap_dir))
+            virtstrap_bin_path = os.path.join(virtstrap_dir_abspath, 'bin')
             # Temporarily change the path to the new one
             old_path = os.environ['PATH']
             os.environ['PATH'] = '%s:%s' % (virtstrap_bin_path, old_path)
@@ -90,8 +94,28 @@ class InitializeCommand(Command):
     def create_quickactivate_script(self, config, options):
         """Create a quickactivate script"""
         self.logger.info('Creating quick activate script')
-        quick_activate = open('./quickactivate.sh', 'w')
+        quick_activate_path = os.path.abspath(os.path.join(
+            options['project_dir'], 'quickactivate.sh'))
+        quick_activate = open(quick_activate_path, 'w')
         quick_activate.write("source")
         quick_activate.close()
+
+class InitializeCommander(Command):
+    name = 'init'
+    parser = parser
+    description = 'Bootstraps a virtstrap virtual environment.'
+
+    def run(self, config, **options):
+        # Create the virtualenv
+        self.create_virtualenv(config, options)
+        # Load the project environment
+        env = self.load_environment()
+        # Create quickactivate script
+        self.create_quickactivate_script(env)
+        # Call the new virtualenv's vstrap install
+        # this allows us to use the virtualenv's python version for any 
+        # necessary compilation
+        vstrap_bin = env.get_bin_path('vstrap')
+        call([vstrap_bin, 'install'])
 
 commands.register(InitializeCommand)

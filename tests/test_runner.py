@@ -73,10 +73,10 @@ class TestVirtstrapRunner(object):
     def test_run_init(self):
         """Run the init command"""
         test_args = ['init']
-        with in_temp_directory() as temp_directory:
+        with in_temp_directory() as temp_dir:
             return_code = self.runner.main(args=test_args)
-            virtual_environment_path = os.path.join(temp_directory, '.vs.env')
-            quick_activate_path = os.path.join(temp_directory, 'quickactivate.sh')
+            virtual_environment_path = os.path.join(temp_dir, '.vs.env')
+            quick_activate_path = os.path.join(temp_dir, 'quickactivate.sh')
             assert os.path.exists(virtual_environment_path) == True
             assert os.path.exists(quick_activate_path) == True
             # Make sure quickactivate source's the activate script
@@ -86,14 +86,30 @@ class TestVirtstrapRunner(object):
             assert return_code == 0
 
     @attr('slow')
-    def test_run_init_to_different_directory(self):
+    def test_run_init_to_different_project_dir(self):
+        """Run the init command in different project dir"""
+        with temp_directory() as temp_dir:
+            test_args = ['init', temp_dir]
+            return_code = self.runner.main(args=test_args)
+            virtual_environment_path = os.path.join(temp_dir, '.vs.env')
+            quick_activate_path = os.path.join(temp_dir, 'quickactivate.sh')
+            assert os.path.exists(virtual_environment_path) == True
+            assert os.path.exists(quick_activate_path) == True
+            # Make sure quickactivate source's the activate script
+            quick_activate = open(quick_activate_path)
+            quick_activate_text = quick_activate.read()
+            assert 'source' in quick_activate_text.strip()
+            assert return_code == 0
+
+    @attr('slow')
+    def test_run_init_env_different_directory(self):
         """Run the init command with a different virtstrap directory"""
         env_dir = 'envdir'
         test_args = ['init', '--virtstrap-dir=%s' % env_dir]
-        with in_temp_directory() as temp_directory:
+        with in_temp_directory() as temp_dir:
             return_code = self.runner.main(args=test_args)
-            virtual_environment_path = os.path.join(temp_directory, env_dir)
-            quick_activate_path = os.path.join(temp_directory, 'quickactivate.sh')
+            virtual_environment_path = os.path.join(temp_dir, env_dir)
+            quick_activate_path = os.path.join(temp_dir, 'quickactivate.sh')
             assert os.path.exists(virtual_environment_path) == True
             assert os.path.exists(quick_activate_path) == True
             assert return_code == 0
@@ -104,7 +120,7 @@ class TestVirtstrapRunner(object):
         """Run the init command with a VEfile in the directory"""
         test_args = ['init']
         with temp_pip_index(PACKAGES_DIR) as index_url:
-            with in_temp_directory() as temp_directory:
+            with in_temp_directory() as temp_dir:
                 # Create temp config file
                 vefile = open('VEfile', 'w')
                 vefile.write(TEST_CONFIG)
@@ -127,7 +143,7 @@ class TestVirtstrapRunner(object):
         custom_config_file = 'testfile'
         test_args = ['init', '--config-file=%s' % custom_config_file]
         with temp_pip_index(PACKAGES_DIR) as index_url:
-            with in_temp_directory() as temp_directory:
+            with in_temp_directory() as temp_dir:
                 # Create the custom config file
                 vefile = open(custom_config_file, 'w')
                 vefile.write(TEST_CONFIG)
@@ -150,7 +166,7 @@ class TestVirtstrapRunner(object):
         profiles = 'production'
         test_args = ['init', '--profiles=%s' % profiles]
         with temp_pip_index(PACKAGES_DIR) as index_url:
-            with in_temp_directory() as temp_directory:
+            with in_temp_directory() as temp_dir:
                 vefile = open('VEfile', 'w')
                 vefile.write(TEST_CONFIG)
                 vefile.close()
