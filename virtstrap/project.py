@@ -3,7 +3,7 @@ from virtstrap import constants
 
 VIRTSTRAP_DIR = constants.VIRTSTRAP_DIR
 
-class Environment(object):
+class Project(object):
     def __init__(self):
         self._options = None
 

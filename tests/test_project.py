@@ -1,24 +1,24 @@
 import fudge
 from tests import fixture_path
 from tests.tools import *
-from virtstrap.environment import Environment, find_project_dir
+from virtstrap.project import Project, find_project_dir
 from virtstrap.options import create_base_parser
 
-def test_initialize_environment():
-    env = Environment()
+def test_initialize_project():
+    project = Project()
 
 def test_environment_seeks_path():
     fake_project_sub_directory = fixture_path('sample_project/lev1/lev2')
     base_parser = create_base_parser()
     base_options = base_parser.parse_args(args=[])
     with in_directory(fake_project_sub_directory):
-        env = Environment()
+        env = Project()
         env.load_options(base_options)
         assert env.project_dir == fixture_path('sample_project')
 
-class TestEnvironment(object):
+class TestProject(object):
     def setup(self):
-        self.env = Environment()
+        self.env = Project()
     
     def test_project_path(self):
         options = dict_to_object(dict(project_dir='/projdir'))
