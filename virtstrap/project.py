@@ -1,3 +1,7 @@
+"""
+virtstrap.project
+-----------------
+"""
 import os
 from virtstrap import constants
 
