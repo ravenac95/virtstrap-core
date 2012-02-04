@@ -56,8 +56,8 @@ class VirtstrapRunner(object):
     def run_command(self, name, config, cli_args):
         """Load command from virtstrap.commands"""
         logger.debug('Command "%s" chosen' % name)
-        options = cli_args.__dict__
-        return registry.run(name, config, **options)
+        options = cli_args
+        return registry.run(name, config, options)
 
 
 def main(args=None):

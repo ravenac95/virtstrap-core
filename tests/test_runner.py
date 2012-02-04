@@ -47,6 +47,13 @@ class TestVirtstrapRunner(object):
     def teardown(self):
         self.runner = None
 
+    @fudge.patch('virtstrap.runner.registry')
+    def test_runner_run_command(self, fake_registry):
+        """Test that the runner passes the correct data to the registry"""
+        args = ('test', 'config', 'options')
+        fake_registry.expects('run').with_args(*args)
+        self.runner.run_command(*args)
+
     @fudge.patch('sys.stderr')
     def test_run_no_args(self, fake_stderr):
         """Run the main command line utility with no args"""
