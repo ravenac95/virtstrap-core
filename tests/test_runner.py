@@ -118,8 +118,10 @@ class TestVirtstrapRunner(object):
         with in_temp_directory() as temp_dir:
             return_code = self.runner.main(args=test_args)
             virtual_environment_path = os.path.join(temp_dir, env_dir)
+            virtual_environment_path_link = os.path.join(temp_dir, '.vs.env')
             quick_activate_path = os.path.join(temp_dir, 'quickactivate.sh')
             assert os.path.exists(virtual_environment_path) == True
+            assert os.path.islink(virtual_environment_path_link) == True
             assert os.path.exists(quick_activate_path) == True
             assert return_code == 0
     

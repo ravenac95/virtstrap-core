@@ -25,9 +25,11 @@ class Project(object):
         project_dir = getattr(options, 'project_dir', None)
         if not project_dir:
             project_dir = self._find_project_dir()
+        project_dir = os.path.abspath(project_dir)
         self._project_dir = project_dir
         config_file = os.path.join(project_dir, options.config_file)
-        config = VirtstrapConfig.from_file(config_file)
+        config = VirtstrapConfig.from_file(config_file, 
+                profiles=options.profiles)
         processor = ProjectNameProcessor(project_dir)
         project_name = config.process_section('project_name', processor)
         self._project_name = project_name

@@ -22,6 +22,7 @@ def test_project_seeks_project_path():
 class BaseProjectTest(object):
     """This handles some common boilerplate between project tests"""
     def base_setup(self, option_overrides):
+        # Create a fake VirtstrapConfig
         config = fudge.Fake()
         config.provides('from_file').returns(config)
         (config.provides('process_section')
@@ -32,6 +33,7 @@ class BaseProjectTest(object):
                 'VirtstrapConfig', config)
         base_parser = create_base_parser()
         options = base_parser.parse_args(args=[])
+        # Add any overrides
         for name, override in option_overrides.iteritems():
             setattr(options, name, override)
         self.project = Project.load(options)
@@ -84,6 +86,16 @@ class TestProjectOnlyProjectDirectoryDefined(BaseProjectTest):
         project = self.project
         assert project.bin_path('a') == '/projdir/.vs.env/bin/a'
         assert project.bin_path('a', 'b') == '/projdir/.vs.env/bin/a/b'
+
+class TestProjectOnlyProjectDirectoryRelativelyDefined(BaseProjectTest):
+    def test_project_path(self):
+        with in_temp_directory() as temp_dir:
+            self.base_setup(dict(project_dir='./projdir'))
+            project = self.project
+            print project.path('a')
+            assert project.path('a').startswith(temp_dir)
+            assert project.path('a').endswith('/projdir/a')
+            assert project.path('a', 'b').endswith('/projdir/a/b')
 
 def test_process_project_name():
     name_processor = ProjectNameProcessor('/projdir/')

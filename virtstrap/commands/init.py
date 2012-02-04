@@ -20,34 +20,39 @@ def process_requirements_config(raw_requirements):
 class InstallationError(Exception):
     pass
 
-class InitializeCommand(commands.Command):
+class InitializeCommand(commands.ProjectCommand):
     name = 'init'
     parser = parser
     description = 'Bootstraps a virtstrap virtual environment.'
 
-    def run(self, config, **options):
-        self.create_virtualenv(config, options)
-        self.create_quickactivate_script(config, options)
-        self.build_requirements(config, options)
+    def run(self, project, options):
+        self.create_virtualenv(project)
+        self.create_quickactivate_script(project)
+        #raise Exception()
+        self.build_requirements(project, options)
 
-    def create_virtualenv(self, config, options):
+    def create_virtualenv(self, project):
         """Create virtual environment in the virtstrap directory"""
-        virtstrap_dir = options.get('virtstrap_dir')
-        # Project Directory
-        virtstrap_dir_abspath = os.path.abspath(os.path.join(
-                options['project_dir'], virtstrap_dir))
-        self.logger.info('Creating virtualenv in %s' % virtstrap_dir_abspath)
-        virtualenv.create_environment(virtstrap_dir_abspath,
+        virtstrap_dir = project.env_path()
+        project_name = project.name
+        self.logger.info('Creating virtualenv in %s for "%s"' % (
+            virtstrap_dir, project_name))
+        # Create the virtualenv
+        virtualenv.create_environment(virtstrap_dir,
                 site_packages=False,
-                prompt="(%s) " % 'proj')
+                prompt="(%s) " % project_name)
+        expected_virtstrap_dir = project.path(constants.VIRTSTRAP_DIR)
+        if virtstrap_dir != expected_virtstrap_dir:
+            # if the expected project path isn't there then make sure
+            # we have a link at the expected location.
+            os.symlink(virtstrap_dir, expected_virtstrap_dir)
 
-    def build_requirements(self, config, options):
+    def build_requirements(self, project, options):
         """Build the requirements specified in config"""
         logger = self.logger
-        logger.info('Building requirements in "%s"' % 
-                options.get('config_file'))
+        logger.info('Building requirements in "%s"' % options.config_file)
         # Process the requirements into a requirement set
-        requirement_set = config.process_section('requirements', 
+        requirement_set = project._config.process_section('requirements', 
                 process_requirements_config)
         requirements_string = requirement_set.to_pip_str()
         if requirements_string:
@@ -57,16 +62,11 @@ class InitializeCommand(commands.Command):
             temp_reqs_file.write(requirements_string)
             temp_reqs_file.close()
             
-            # Get new path data
-            virtstrap_dir = options.get('virtstrap_dir')
-            virtstrap_dir_abspath = os.path.abspath(os.path.join(
-                    options['project_dir'], virtstrap_dir))
-            virtstrap_bin_path = os.path.join(virtstrap_dir_abspath, 'bin')
             # Temporarily change the path to the new one
             old_path = os.environ['PATH']
-            os.environ['PATH'] = '%s:%s' % (virtstrap_bin_path, old_path)
+            os.environ['PATH'] = '%s:%s' % (project.bin_path(), old_path)
             try:
-                self.run_pip_install(virtstrap_bin_path, temp_reqs_path)
+                self.run_pip_install(project.bin_path, temp_reqs_path)
             except InstallationError:
                 # Exit if any problems occur during installation
                 self.logger.error('Installation could not be completed. '
@@ -76,13 +76,14 @@ class InitializeCommand(commands.Command):
                 logger.debug('Removing temporary requirements file')
                 os.remove(temp_reqs_path)
             os.environ['PATH'] = old_path
-        requirements_file = open('requirements.txt', 'w')
+        requirements_path = project.path('requirements.txt')
+        requirements_file = open(requirements_path, 'w')
         requirements_file.write(requirements_string)
         requirements_file.close()
 
-    def run_pip_install(self, virtstrap_bin_path, requirements_file):
+    def run_pip_install(self, bin_path_resolver, requirements_file):
         # Run pip to install packages
-        pip_bin = os.path.join(virtstrap_bin_path, 'pip')
+        pip_bin = bin_path_resolver('pip')
         pip_command = 'install'
         self.logger.info('Running pip at %s' % pip_bin)
         return_code = call([pip_bin, pip_command, "-r", 
@@ -90,11 +91,10 @@ class InitializeCommand(commands.Command):
         if return_code != 0:
             raise InstallationError('An error occured during installation')
 
-    def create_quickactivate_script(self, config, options):
+    def create_quickactivate_script(self, project):
         """Create a quickactivate script"""
         self.logger.info('Creating quick activate script')
-        quick_activate_path = os.path.abspath(os.path.join(
-            options['project_dir'], 'quickactivate.sh'))
+        quick_activate_path = project.path('quickactivate.sh')
         quick_activate = open(quick_activate_path, 'w')
         quick_activate.write("source")
         quick_activate.close()
