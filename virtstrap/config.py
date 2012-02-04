@@ -23,7 +23,10 @@ class VirtstrapConfig(object):
 
     @classmethod
     def from_file(cls, filename, profiles=None):
-        string = open(filename)
+        try:
+            string = open(filename)
+        except IOError:
+            string = ''
         return cls.from_string(string, profiles=profiles)
 
     def __init__(self, profiles=None):

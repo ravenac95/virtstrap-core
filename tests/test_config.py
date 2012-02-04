@@ -71,6 +71,11 @@ def test_load_from_file():
     config = VirtstrapConfig.from_file(fixture_path('test.yml'))
     assert isinstance(config, VirtstrapConfig)
 
+def test_load_from_file_does_not_exist():
+    """Load a configuration file even if it doesn't exist"""
+    config = VirtstrapConfig.from_file(fixture_path('i_do_not_exist____.yml'))
+    assert isinstance(config, VirtstrapConfig)
+
 @raises(ConfigurationError)
 def test_load_config_from_bad_string():
     """Test loading of a bad configuration"""
