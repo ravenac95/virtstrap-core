@@ -4,32 +4,35 @@ virtstrap.project
 """
 import os
 from virtstrap import constants
+from virtstrap.config import VirtstrapConfig
 
 VIRTSTRAP_DIR = constants.VIRTSTRAP_DIR
 
 class Project(object):
     @classmethod
-    def load(cls, config, options):
+    def load(cls, options):
         """Creates a project and loads it's configuration immediately"""
         project = cls()
-        project.load_settings(config, options)
+        project.load_settings(options)
         return project
 
     def __init__(self):
         self._options = None
         self._config = None
     
-    def load_settings(self, config, options):
-        self._options = options
-        self._config = config
+    def load_settings(self, options):
         # Check if project directory is specified
         project_dir = getattr(options, 'project_dir', None)
         if not project_dir:
             project_dir = self._find_project_dir()
         self._project_dir = project_dir
+        config_file = os.path.join(project_dir, options.config_file)
+        config = VirtstrapConfig.from_file(config_file)
         processor = ProjectNameProcessor(project_dir)
         project_name = config.process_section('project_name', processor)
         self._project_name = project_name
+        self._config = config
+        self._options = options
 
     def _find_project_dir(self):
         return find_project_dir()

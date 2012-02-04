@@ -1,5 +1,6 @@
 import fudge
 from fudge.inspector import arg
+from fudge.patcher import patch_object
 from tests import fixture_path
 from tests.tools import *
 from virtstrap.project import Project, find_project_dir, ProjectNameProcessor
@@ -10,26 +11,40 @@ def test_initialize_project():
 
 @fudge.test
 def test_project_seeks_project_path():
-    from virtstrap.config import VirtstrapConfig
     fake_project_sub_directory = fixture_path('sample_project/lev1/lev2')
     base_parser = create_base_parser()
     base_options = base_parser.parse_args(args=[])
     with in_directory(fake_project_sub_directory):
-        config = VirtstrapConfig.from_string('')
-        project = Project.load(config, base_options)
+        project = Project.load(base_options)
         assert project.path() == fixture_path('sample_project')
         assert project.name == 'sample_project'
 
-class TestProjectDirectoriesDefined(object):
-    def setup(self):
+class BaseProjectTest(object):
+    """This handles some common boilerplate between project tests"""
+    def base_setup(self, option_overrides):
         config = fudge.Fake()
+        config.provides('from_file').returns(config)
         (config.provides('process_section')
                 .with_args('project_name', arg.any())
                 .returns('projdir'))
+        # Patch VirtstrapConfig
+        self.config_patch = patch_object('virtstrap.project', 
+                'VirtstrapConfig', config)
         base_parser = create_base_parser()
-        options = dict_to_object(dict(virtstrap_dir='/vsdir', 
-            project_dir='/projdir'))
-        self.project = Project.load(config, options)
+        options = base_parser.parse_args(args=[])
+        for name, override in option_overrides.iteritems():
+            setattr(options, name, override)
+        self.project = Project.load(options)
+
+    def teardown(self):
+        # Restore to state before patching
+        self.config_patch.restore()
+
+class TestProjectDirectoriesDefined(BaseProjectTest):
+    def setup(self):
+        option_overrides = dict(virtstrap_dir='/vsdir', 
+            project_dir='/projdir')
+        self.base_setup(option_overrides)
 
     def test_get_project_name(self):
         """Test that the project name is found"""
@@ -51,16 +66,9 @@ class TestProjectDirectoriesDefined(object):
         assert project.env_path('a') == '/vsdir/a'
         assert project.env_path('a', 'b') == '/vsdir/a/b'
 
-class TestProjectOnlyProjectDirectoryDefined(object):
+class TestProjectOnlyProjectDirectoryDefined(BaseProjectTest):
     def setup(self):
-        config = fudge.Fake()
-        (config.provides('process_section')
-                .with_args('project_name', arg.any())
-                .returns('projdir'))
-        base_parser = create_base_parser()
-        options = base_parser.parse_args(args=[])
-        options.project_dir = '/projdir'
-        self.project = Project.load(config, options)
+        self.base_setup(dict(project_dir='/projdir'))
     
     def test_project_path(self):
         project = self.project

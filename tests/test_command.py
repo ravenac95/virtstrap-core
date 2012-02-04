@@ -40,16 +40,16 @@ def test_run_with_exception():
         def run(self, *args, **kwargs):
             raise Exception('Forced Error')
     command = FakeCommand()
-    assert command.execute('config', 'option') == 2
+    assert command.execute('options') == 2
 
 @fudge.patch('virtstrap.basecommand.Project')
 def test_project_mixin_loads_project(FakeProject):
     """Test ProjectMixin"""
     class FakeCommand(Command, ProjectMixin):
         name = "test"
-    FakeProject.expects('load').with_args('config', 'options').returns('proj')
+    FakeProject.expects('load').with_args('options').returns('proj')
     fake = FakeCommand()
-    project = fake.load_project('config', 'options')
+    project = fake.load_project('options')
     assert project == 'proj'
 
 @fudge.patch('virtstrap.basecommand.Project')
@@ -57,9 +57,9 @@ def test_project_mixin_loads_project(FakeProject):
     """Test ProjectMixin"""
     class FakeCommand(Command, ProjectMixin):
         name = 'test'
-    FakeProject.expects('load').with_args('config', 'options').returns('proj')
+    FakeProject.expects('load').with_args('options').returns('proj')
     fake = FakeCommand()
-    project = fake.load_project('config', 'options')
+    project = fake.load_project('options')
     assert project == 'proj'
 
 @fudge.patch('virtstrap.basecommand.Project')
@@ -70,9 +70,9 @@ def test_project_command_runs_with_project(FakeProject):
         def run(self, project, options):
             assert project == 'proj'
     (FakeProject.expects('load')
-            .with_args('config', 'options').returns('proj'))
+            .with_args('options').returns('proj'))
     command = FakeProjectCommand()
-    return_code = command.execute('config', 'options')
+    return_code = command.execute('options')
     assert return_code == 0
 
 def test_project_command_runs_with_project_not_faked():
@@ -82,13 +82,11 @@ def test_project_command_runs_with_project_not_faked():
         def run(self, project, options):
             assert project.name == 'sample_project'
             assert project.env_path().endswith('sample_project/.vs.env')
-    from virtstrap.config import VirtstrapConfig
     from virtstrap.options import create_base_parser
     base_parser = create_base_parser()
     base_options = base_parser.parse_args(args=[])
     fake_project_sub_directory = fixture_path('sample_project/lev1/lev2')
     with in_directory(fake_project_sub_directory):
-        config = VirtstrapConfig.from_string('')
         command = FakeProjectCommand()
-        return_code = command.execute(config, base_options)
+        return_code = command.execute(base_options)
         assert return_code == 0

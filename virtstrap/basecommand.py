@@ -18,26 +18,26 @@ class Command(object):
         self.options = []
         self.logger = logger
 
-    def execute(self, config, options):
+    def execute(self, options):
         self.logger.info('Running "%s" command' % self.name)
         try:
-            self.run(config, options)
+            self.run(options)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
             return 2
         return 0
 
-    def run(self, config, **options):
+    def run(self, options):
         raise NotImplementedError('This command does nothing')
 
 class ProjectMixin(object):
-    def load_project(self, config, options):
-        return Project.load(config, options)
+    def load_project(self, options):
+        return Project.load(options)
 
 class ProjectCommand(Command, ProjectMixin):
-    def execute(self, config, options):
-        project = self.load_project(config, options)
+    def execute(self, options):
+        project = self.load_project(options)
         self.logger.info('Running "%s" command' % self.name)
         try:
             self.run(project, options)

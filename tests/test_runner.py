@@ -47,11 +47,13 @@ class TestVirtstrapRunner(object):
     def teardown(self):
         self.runner = None
 
-    @fudge.patch('virtstrap.runner.registry')
-    def test_runner_run_command(self, fake_registry):
+    @fudge.test
+    def test_runner_run_command(self):
         """Test that the runner passes the correct data to the registry"""
-        args = ('test', 'config', 'options')
+        args = ('test', 'options')
+        fake_registry = fudge.Fake()
         fake_registry.expects('run').with_args(*args)
+        self.runner.set_registry(fake_registry)
         self.runner.run_command(*args)
 
     @fudge.patch('sys.stderr')

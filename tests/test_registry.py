@@ -19,17 +19,18 @@ class TestCommandRegistry(object):
     @fudge.test
     def test_run_a_command(self):
         """Test that a command runs correctly"""
+        from virtstrap.commands import Command
         # Setup fake command instance
-        fake_instance = fudge.Fake()
-        (fake_instance.expects('execute')
-                .with_args('config', 'options')
-                .returns('retval'))
-        # Setup fake command class
-        FakeCommand = fudge.Fake()
-        FakeCommand.has_attr(name='test')
-        FakeCommand.expects_call().returns(fake_instance)
+        command_args = ('test', 'options')
+        class FakeCommand(Command):
+            name = 'test'
+            called = False
+            def run(self, options):
+                self.__class__.called = True
+                assert options == 'options'
 
         #register to the registry
         registry = self.registry
         registry.register(FakeCommand)
-        assert registry.run('test', 'config', 'options') == 'retval'
+        assert registry.run(*command_args) == 0
+        assert FakeCommand.called
