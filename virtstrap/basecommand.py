@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from virtstrap.project import Project
 from virtstrap.log import logger
 
-__all__ = ['Command']
+__all__ = ['Command', 'ProjectMixin', 'ProjectCommand']
 
 class Command(object):
     name = None
@@ -33,5 +33,20 @@ class Command(object):
 
 class ProjectMixin(object):
     def load_project(self, config, options):
-        pass
+        return Project.load(config, options)
+
+class ProjectCommand(Command, ProjectMixin):
+    def execute(self, config, options):
+        project = self.load_project(config, options)
+        self.logger.info('Running "%s" command' % self.name)
+        try:
+            self.run(project)
+        except:
+            self.logger.exception('An error occured executing command "%s"' %
+                    self.__class__.__name__)
+            return 2
+        return 0
+
+    def run(self, project):
+        raise NotImplementedError('This command does nothing')
 
