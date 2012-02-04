@@ -49,8 +49,7 @@ def create_base_parser():
             default='development')
     global_group.add_argument('--project-dir', dest='project_dir', 
             metavar='PROJECT_DIR',
-            action='store', help='specify project directory',
-            default='.')
+            action='store', help='specify project directory')
     return parser
 
 def parser_from_commands(commands):
