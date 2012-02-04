@@ -40,7 +40,7 @@ class ProjectCommand(Command, ProjectMixin):
         project = self.load_project(config, options)
         self.logger.info('Running "%s" command' % self.name)
         try:
-            self.run(project)
+            self.run(project, options)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)

@@ -20,7 +20,7 @@ def test_project_seeks_project_path():
         assert project.path() == fixture_path('sample_project')
         assert project.name == 'sample_project'
 
-class TestProject(object):
+class TestProjectDirectoriesDefined(object):
     def setup(self):
         config = fudge.Fake()
         (config.provides('process_section')
@@ -50,6 +50,32 @@ class TestProject(object):
         project = self.project
         assert project.env_path('a') == '/vsdir/a'
         assert project.env_path('a', 'b') == '/vsdir/a/b'
+
+class TestProjectOnlyProjectDirectoryDefined(object):
+    def setup(self):
+        config = fudge.Fake()
+        (config.provides('process_section')
+                .with_args('project_name', arg.any())
+                .returns('projdir'))
+        base_parser = create_base_parser()
+        options = base_parser.parse_args(args=[])
+        options.project_dir = '/projdir'
+        self.project = Project.load(config, options)
+    
+    def test_project_path(self):
+        project = self.project
+        assert project.path('a') == '/projdir/a'
+        assert project.path('a', 'b') == '/projdir/a/b'
+
+    def test_env_path(self):
+        project = self.project
+        assert project.env_path('a') == '/projdir/.vs.env/a'
+        assert project.env_path('a', 'b') == '/projdir/.vs.env/a/b'
+
+    def test_bin_path(self):
+        project = self.project
+        assert project.bin_path('a') == '/projdir/.vs.env/bin/a'
+        assert project.bin_path('a', 'b') == '/projdir/.vs.env/bin/a/b'
 
 def test_process_project_name():
     name_processor = ProjectNameProcessor('/projdir/')

@@ -67,18 +67,19 @@ def test_project_command_runs_with_project(FakeProject):
     """Test ProjectCommand runs correctly"""
     class FakeProjectCommand(ProjectCommand):
         name = 'test'
-        def run(self, project):
+        def run(self, project, options):
             assert project == 'proj'
     (FakeProject.expects('load')
             .with_args('config', 'options').returns('proj'))
     command = FakeProjectCommand()
-    command.execute('config', 'options')
+    return_code = command.execute('config', 'options')
+    assert return_code == 0
 
 def test_project_command_runs_with_project_not_faked():
     """Test ProjectCommand in a sandbox"""
     class FakeProjectCommand(ProjectCommand):
         name = 'test'
-        def run(self, project):
+        def run(self, project, options):
             assert project.name == 'sample_project'
             assert project.env_path().endswith('sample_project/.vs.env')
     from virtstrap.config import VirtstrapConfig
@@ -89,4 +90,5 @@ def test_project_command_runs_with_project_not_faked():
     with in_directory(fake_project_sub_directory):
         config = VirtstrapConfig.from_string('')
         command = FakeProjectCommand()
-        command.execute(config, base_options)
+        return_code = command.execute(config, base_options)
+        assert return_code == 0

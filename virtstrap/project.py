@@ -47,7 +47,8 @@ class Project(object):
 
     def env_path(self, *paths):
         """Create a path relative to the virtstrap-dir"""
-        return os.path.join(self._options.virtstrap_dir, *paths)
+        return os.path.join(self._project_dir, 
+                self._options.virtstrap_dir, *paths)
 
     def bin_path(self, *paths):
         """Create a path relative to the virtstrap-dir's bin directory"""
