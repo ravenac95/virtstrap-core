@@ -3,3 +3,6 @@ test:
 
 quicktest:
 	nosetests -a '!slow' -d
+
+quicktest_verbose:
+	nosetests -a '!slow' -d -v
