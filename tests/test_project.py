@@ -25,7 +25,7 @@ class BaseProjectTest(object):
         # Create a fake VirtstrapConfig
         config = fudge.Fake()
         config.provides('from_file').returns(config)
-        (config.provides('process_section')
+        self.config = (config.provides('process_section')
                 .with_args('project_name', arg.any())
                 .returns('projdir'))
         # Patch VirtstrapConfig
@@ -36,7 +36,18 @@ class BaseProjectTest(object):
         # Add any overrides
         for name, override in option_overrides.iteritems():
             setattr(options, name, override)
-        self.project = Project.load(options)
+        self._options = options
+        self._project = None
+    
+    @property
+    def project(self):
+        """Lazy Load the project"""
+        project = self._project
+        if not project:
+            # Only load it once
+            self._project = Project.load(self._options)
+            project = self._project
+        return project
 
     def teardown(self):
         # Restore to state before patching
@@ -86,6 +97,25 @@ class TestProjectOnlyProjectDirectoryDefined(BaseProjectTest):
         project = self.project
         assert project.bin_path('a') == '/projdir/.vs.env/bin/a'
         assert project.bin_path('a', 'b') == '/projdir/.vs.env/bin/a/b'
+
+class TestProjectGeneral(BaseProjectTest):
+    def setup(self):
+        # this is necessary
+        self.base_setup(dict(project_dir='/projdir'))
+    
+    @fudge.test
+    def test_process_config_section(self):
+        (self.config.expects('process_section')
+                .with_args('section', 'f')
+                .returns('processed'))
+        self.project.process_config_section('section', 'f')
+
+    @fudge.test
+    def test_access_config_from_project(self):
+        (self.config.expects('processed')
+                .with_args('test')
+                .returns('test_data'))
+        assert self.project.config('test') == 'test_data'
 
 class TestProjectOnlyProjectDirectoryRelativelyDefined(BaseProjectTest):
     def test_project_path(self):

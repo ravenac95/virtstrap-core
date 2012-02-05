@@ -65,6 +65,13 @@ class Project(object):
     def bin_path(self, *paths):
         """Create a path relative to the virtstrap-dir's bin directory"""
         return self.env_path('bin', *paths)
+    
+    def process_config_section(self, section, processor):
+        return self._config.process_section(section, processor)
+
+    def config(self, section):
+        """Grabs processed section data"""
+        return self._config.processed(section)
 
 def find_project_dir(current_dir=None):
     """Finds the project directory for the current directory"""
