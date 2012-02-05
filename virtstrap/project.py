@@ -34,6 +34,7 @@ class Project(object):
         project_name = config.process_section('project_name', processor)
         self._project_name = project_name
         self._config = config
+        self._config_file = config_file
         self._options = options
 
     def _find_project_dir(self):
@@ -42,6 +43,12 @@ class Project(object):
     @property
     def name(self):
         return self._project_name
+
+    @property
+    def config_file(self):
+        if not os.path.isfile(self._config_file):
+            return None
+        return self._config_file
 
     def set_options(self, options):
         self._options = options
