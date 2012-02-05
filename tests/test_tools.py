@@ -60,3 +60,33 @@ def test_dict_to_object():
     obj = dict_to_object(dict(a=1,b=2))
     assert obj.a == 1
     assert obj.b == 2
+
+def test_temp_virtualenv():
+    with temp_virtualenv() as temp_env_dir:
+        assert os.path.exists(os.path.join(temp_env_dir, 'bin/python'))
+    assert not os.path.exists(os.path.join(temp_env_dir, 'bin/python'))
+
+class TestException(Exception):
+    pass
+
+def test_temp_directory_raises_error():
+    raised_error = False
+    try:
+        with temp_directory() as temp_dir:
+            raise TestException()
+    except TestException:
+        raised_error = True
+    assert raised_error
+    assert not os.path.exists(temp_dir)
+
+def test_in_directory_raises_error():
+    raised_error = False
+    original_working_dir = os.getcwd()
+    basic_project_dir = fixture_path('sample_project')
+    try:
+        with in_directory(basic_project_dir):
+            raise TestException()
+    except TestException:
+        raised_error = True
+    assert raised_error
+    assert os.getcwd() == original_working_dir
