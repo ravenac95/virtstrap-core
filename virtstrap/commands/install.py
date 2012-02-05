@@ -2,6 +2,7 @@ import tempfile
 import subprocess
 from contextlib import contextmanager
 from virtstrap import commands
+from virtstrap.requirements import RequirementSet
 
 def process_requirements_config(raw_requirements):
     requirement_set = RequirementSet.from_config_data(raw_requirements)
@@ -15,9 +16,10 @@ class InstallCommand(commands.ProjectCommand):
 
     def run(self, project, options):
         requirement_set = self.get_requirement_set(project)
-        temp_reqs_path= self.write_temp_requirements_file(requirement_set)
-        self.run_pip_install(project, temp_reqs_path)
-        self.freeze_requirements(project, requirement_set)
+        if requirement_set:
+            temp_reqs_path = self.write_temp_requirements_file(requirement_set)
+            self.run_pip_install(project, temp_reqs_path)
+            self.freeze_requirements(project, requirement_set)
 
     def get_requirement_set(self, project):
         requirement_set = project.process_config_section('requirements',
@@ -52,7 +54,4 @@ class InstallCommand(commands.ProjectCommand):
         requirements_lock.write(requirements)
         requirements_lock.close()
 
-        
-
-
-
+commands.register(InstallCommand)

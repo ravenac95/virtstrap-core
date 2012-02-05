@@ -140,7 +140,7 @@ class TestVirtstrapRunner(object):
                 # it will install all the software
                 return_code = self.runner.main(args=test_args)
                 # Do a loose check of the requirements
-                requirements = open('requirements.txt')
+                requirements = open('requirements.lock')
                 requirements_string = requirements.read()
                 expected_strings = ['test1', 'test5', 'test4']
                 for package in expected_strings:
@@ -161,7 +161,7 @@ class TestVirtstrapRunner(object):
                 vefile.close()
                 return_code = self.runner.main(args=test_args)
                 # Do a loose check of the requirements
-                requirements = open('requirements.txt')
+                requirements = open('requirements.lock')
                 requirements_string = requirements.read()
                 expected_strings = ['feedparser', 'werkzeug', 'requests', 
                         'brownie']
@@ -183,7 +183,7 @@ class TestVirtstrapRunner(object):
                 vefile.close()
                 return_code = self.runner.main(args=test_args)
                 # Do a loose check of the requirements
-                requirements = open('requirements.txt')
+                requirements = open('requirements.lock')
                 requirements_string = requirements.read()
                 expected_strings = ['test1', 'test5', 'test6']
                 for package in expected_strings:
