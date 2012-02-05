@@ -9,13 +9,10 @@ parser.add_argument('project_dir', metavar='PROJECT_DIR',
         help="project's root directory",
         nargs='?', default='.')
 
-class InstallationError(Exception):
-    pass
-
 class InitializeCommand(commands.ProjectCommand):
     name = 'init'
     parser = parser
-    description = 'Bootstraps a virtstrap virtual environment.'
+    description = 'Bootstraps a virtstrap virtual environment'
 
     def run(self, project, options):
         self.create_virtualenv(project)

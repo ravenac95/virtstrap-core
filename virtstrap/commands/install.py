@@ -13,6 +13,7 @@ class InstallationError(Exception):
 
 class InstallCommand(commands.ProjectCommand):
     name = 'install'
+    description = "Installs the project's python requirements"
 
     def run(self, project, options):
         requirement_set = self.get_requirement_set(project)
