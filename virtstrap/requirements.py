@@ -26,6 +26,9 @@ class RequirementSet(object):
             pip_lines.append(requirement.to_pip_str())
         return '\n'.join(pip_lines)
 
+    def __len__(self):
+        return len(self._requirements)
+
 def process_raw_requirements(raw_data):
     processor = RequirementsProcessor()
     return processor.to_requirements(raw_data)

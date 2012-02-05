@@ -54,6 +54,10 @@ class TestRequirementSet(object):
         req_set = RequirementSet.from_config_data(requirements_list)
         req_set.to_pip_str()
 
+    def test_requirement_set_as_boolean(self):
+        req_set = RequirementSet.from_config_data(None)
+        assert not req_set
+
 class TestRequirementsProcessor(object):
     def setup(self):
         # RequirementsProcessor uses a dictionary of
