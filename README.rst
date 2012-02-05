@@ -1,4 +1,4 @@
-VirtStrap
+virtstrap
 =========
 
 A simple script that allows you to setup a repeatable project using a
