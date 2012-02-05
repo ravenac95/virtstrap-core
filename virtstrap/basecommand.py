@@ -18,7 +18,7 @@ class Command(object):
         self.options = []
         self.logger = logger
 
-    def execute(self, options):
+    def execute(self, options, **kwargs):
         self.logger.info('Running "%s" command' % self.name)
         try:
             self.run(options)
@@ -36,8 +36,9 @@ class ProjectMixin(object):
         return Project.load(options)
 
 class ProjectCommand(Command, ProjectMixin):
-    def execute(self, options):
-        project = self.load_project(options)
+    def execute(self, options, project=None, **kwargs):
+        if not project:
+            project = self.load_project(options)
         self.logger.info('Running "%s" command' % self.name)
         try:
             self.run(project, options)

@@ -31,13 +31,13 @@ class CommandRegistry(object):
     def commands_iter(self):
         return iter(sorted(self._registered_commands.iteritems()))
     
-    def run(self, name, options):
+    def run(self, name, options, **kwargs):
         """Runs command with name"""
         command_class = self.retrieve(name)
         if not command_class:
             raise CommandDoesNotExist('Command "%s" does not exist' % name)
         command = command_class()
-        return command.execute(options)
+        return command.execute(options, **kwargs)
 
     def print_command_help(self):
         """Display all the commands and their descriptions"""
