@@ -1,6 +1,7 @@
 import os
 import urllib2
 from nose.plugins.attrib import attr
+from virtstrap import constants
 from tests.tools import *
 from tests import fixture_path
 
@@ -90,3 +91,34 @@ def test_in_directory_raises_error():
         raised_error = True
     assert raised_error
     assert os.getcwd() == original_working_dir
+
+
+def test_temp_project():
+    from virtstrap.project import Project
+    with temp_project() as info:
+        project, options, temp_dir = info
+        assert os.path.exists(temp_dir)
+        assert options.virtstrap_dir == constants.VIRTSTRAP_DIR
+        assert options.project_dir == temp_dir
+        assert project.path() == temp_dir
+        # Make sure virtualenv did it's job
+        assert os.path.exists(project.bin_path('pip'))
+        assert isinstance(project, Project)
+        assert isinstance(project, FakeProject)
+    assert not os.path.exists(temp_dir)
+
+
+def test_context_user():
+    from contextlib import contextmanager
+    test_dict = dict(value='before')
+    @contextmanager
+    def test_context(test_dict):
+        test_dict['value'] = 'during'
+        yield 'test'
+        test_dict['value'] = 'after'
+    ctx = ContextUser(test_context(test_dict))
+    assert test_dict['value'] == 'before'
+    ctx.enter()
+    assert test_dict['value'] == 'during'
+    ctx.exit()
+    assert test_dict['value'] == 'after'
