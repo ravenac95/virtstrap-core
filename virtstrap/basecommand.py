@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from jinja2 import Environment
 from virtstrap.project import Project
 from virtstrap.log import logger
 
@@ -9,16 +10,16 @@ class Command(object):
     args = None
     parser = ArgumentParser()
     description = None
-    options = None
 
     def __init__(self):
         # Ensure that name, usage, and description
         # are defined
         assert self.name
-        self.options = []
+        self.options = None
         self.logger = logger
 
     def execute(self, options, **kwargs):
+        self.options = options
         self.logger.info('Running "%s" command' % self.name)
         try:
             self.run(options)
@@ -26,7 +27,19 @@ class Command(object):
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
             return 2
+        finally:
+            self.options = None
         return 0
+
+    def render_string(self, source):
+        """Render's a string using Jinja2 templates"""
+        env = self.template_environment()
+        template = env.from_string(source)
+        context = dict(command=self, options=self.options)
+        return template.render(context)
+
+    def template_environment(self):
+        return Environment()
 
     def run(self, options):
         raise NotImplementedError('This command does nothing')
