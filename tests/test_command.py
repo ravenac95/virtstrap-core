@@ -161,19 +161,6 @@ def test_project_command_runs_with_project_not_faked():
         assert return_code == 0
         assert_called_flag(command)
 
-def test_command_renders_template_string():
-    """Test that command renders a template"""
-    class FakeCommand(Command):
-        name = 'test'
-        def run(self, *args, **kwargs):
-            self.called = True
-            assert command.render_string('{{ command.name }}') == 'test'
-            assert command.render_string('{{ options }}') == 'options'
-    command = FakeCommand()
-    return_code = command.execute('options')
-    assert return_code == 0
-    assert_called_flag(command)
-
 def test_command_creates_template_environment():
     """Test that command creates a template environment"""
     from jinja2 import Environment
@@ -182,6 +169,34 @@ def test_command_creates_template_environment():
         def run(self, *args, **kwargs):
             self.called = True
             assert isinstance(self.template_environment(), Environment)
+    command = FakeCommand()
+    return_code = command.execute('options')
+    assert return_code == 0
+    assert_called_flag(command)
+
+def test_command_renders_template_string():
+    """Test that command renders a template"""
+    class FakeCommand(Command):
+        name = 'test'
+        def run(self, *args, **kwargs):
+            self.called = True
+            assert command.render_template_string(
+                    '{{ command.name }}') == 'test'
+            assert command.render_template_string(
+                    '{{ options }}') == 'options'
+    command = FakeCommand()
+    return_code = command.execute('options')
+    assert return_code == 0
+    assert_called_flag(command)
+
+def test_command_renders_template():
+    """Test that command renders a template"""
+    class FakeCommand(Command):
+        name = 'test'
+        def run(self, *args, **kwargs):
+            self.called = True
+            assert command.render_template(
+                    'tests/test_template.sh.jinja') == 'test::options'
     command = FakeCommand()
     return_code = command.execute('options')
     assert return_code == 0

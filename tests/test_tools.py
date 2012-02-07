@@ -62,6 +62,7 @@ def test_dict_to_object():
     assert obj.a == 1
     assert obj.b == 2
 
+@attr('slow')
 def test_temp_virtualenv():
     with temp_virtualenv() as temp_env_dir:
         assert os.path.exists(os.path.join(temp_env_dir, 'bin/python'))
@@ -92,7 +93,7 @@ def test_in_directory_raises_error():
     assert raised_error
     assert os.getcwd() == original_working_dir
 
-
+@attr('slow')
 def test_temp_project():
     from virtstrap.project import Project
     with temp_project() as info:

@@ -12,6 +12,7 @@ import sys
 REQUIREMENTS = [
     'virtualenv',
     'pyyaml',
+    'jinja2',
 ]
 
 if sys.version_info < (2, 7):

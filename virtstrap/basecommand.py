@@ -31,15 +31,25 @@ class Command(object):
             self.options = None
         return 0
 
-    def render_string(self, source):
+    def render_template_string(self, source):
         """Render's a string using Jinja2 templates"""
         env = self.template_environment()
         template = env.from_string(source)
         context = dict(command=self, options=self.options)
         return template.render(context)
 
+    def render_template(self, template_name):
+        env = self.template_environment()
+        template = env.get_template(template_name)
+        context = dict(command=self, options=self.options)
+        return template.render(context)
+
     def template_environment(self):
-        return Environment()
+        from tests import fixture_path
+        from jinja2 import FileSystemLoader
+        template_path = fixture_path('templates')
+        loader = FileSystemLoader(template_path)
+        return Environment(loader=loader)
 
     def run(self, options):
         raise NotImplementedError('This command does nothing')

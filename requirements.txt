@@ -3,3 +3,4 @@ virtualenv
 pyyaml
 fudge
 pypiserver
+jinja2
