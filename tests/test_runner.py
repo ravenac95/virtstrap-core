@@ -98,15 +98,26 @@ class TestVirtstrapRunner(object):
 
     @attr('slow')
     def test_run_init_to_different_project_dir(self):
-        """Run the init command in different project dir"""
+        """Run the init command in different project dir
+        
+        This test is pretty much identical to test_run_init
+        it's performed in a project directory that isn't the CWD
+        """
         with temp_directory() as temp_dir:
-            test_args = ['init', temp_dir]
+            # Run the init to a project directory
+            test_args = ['init', temp_dir] 
+            
             return_code = self.runner.main(args=test_args)
+
+            # Grab paths for testing
             virtual_environment_path = os.path.join(temp_dir, '.vs.env')
             quick_activate_path = os.path.join(temp_dir, 
                     constants.QUICK_ACTIVATE_FILENAME)
+
+            # Make sure everything exists
             assert os.path.exists(virtual_environment_path) == True
             assert os.path.exists(quick_activate_path) == True
+
             # Make sure quickactivate source's the activate script
             quick_activate = open(quick_activate_path)
             quick_activate_text = quick_activate.read()
@@ -115,7 +126,13 @@ class TestVirtstrapRunner(object):
 
     @attr('slow')
     def test_run_init_env_different_directory(self):
-        """Run the init command with a different virtstrap directory"""
+        """Run the init command with a different virtstrap directory
+        
+        This tests that init can use a different virtstrap directory
+        for its installation. However, when this happens you still need to
+        link to the virtstrap directory locally. Otherwise you won't be able 
+        to locate the project when running vstrap commands.
+        """
         env_dir = 'envdir'
         test_args = ['init', '--virtstrap-dir=%s' % env_dir]
         with in_temp_directory() as temp_dir:
@@ -132,7 +149,11 @@ class TestVirtstrapRunner(object):
     @attr('slow')
     @hide_subprocess_stdout
     def test_run_init_with_a_config(self):
-        """Run the init command with a VEfile in the directory"""
+        """Run the init command with a VEfile in the directory
+
+        Fairly self explanatory. It makes sure the VEfile's 
+        requirements are installed
+        """
         test_args = ['init']
         with temp_pip_index(PACKAGES_DIR) as index_url:
             with in_temp_directory() as temp_dir:
@@ -154,7 +175,10 @@ class TestVirtstrapRunner(object):
     @attr('slow')
     @hide_subprocess_stdout
     def test_run_init_with_a_config_using_custom_config_file(self):
-        """Run the init command with a custom file in the directory"""
+        """Run the init command with a custom config file in the directory
+
+        Uses a file other than VEfile for the configuration.
+        """
         custom_config_file = 'testfile'
         test_args = ['init', '--config-file=%s' % custom_config_file]
         with temp_pip_index(PACKAGES_DIR) as index_url:
