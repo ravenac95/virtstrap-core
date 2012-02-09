@@ -9,12 +9,12 @@ Virtstrap: Simple, Repeatable Environments
 virtstrap makes your life easier, by providing a simple and repeatable
 bootstrapping process. It was inspired by pip+virtualenv and buildout, but
 seeks to create a unified and standard way that won't scare away any new 
-python developers and will make old pythonista lives a bit easier. All with
+python developers and will make old pythonista's lives a bit easier. All with
 the wonderful convenience of the MIT License. 
 
 With virtstrap, setting up your development environment is as simple as this::
     
-    vstrap init
+    $ vstrap init
 
 Current Features
 ----------------
@@ -37,4 +37,5 @@ User Guide
     
     install
     quickstart
+    vefile
 

@@ -18,11 +18,11 @@ doing the following::
     $ vstrap init
 
 This creates a virtualenv in the directory ``myproject/.vs.env`` and a 
-bash script at ``myproject/quickactivate.sh``. 
+bash script at ``myproject/quickactivate``. 
 
 Finally, do::
 
-    $ source quickactivate.sh
+    $ source quickactivate
 
 You now have a virtualenv for ``myproject``. 
 
@@ -94,4 +94,3 @@ all bob has to do is type the following inside his cloned project directory::
     $ vstrap init
 
 Now you're both ready to go. Beautiful isn't it :-)?
-
