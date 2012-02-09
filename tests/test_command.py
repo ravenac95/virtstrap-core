@@ -6,6 +6,7 @@ import fudge
 from nose.tools import *
 from tests import fixture_path
 from tests.tools import *
+from virtstrap.templating import temp_template_environment
 from virtstrap.basecommand import Command, ProjectMixin, ProjectCommand
 
 class FakeCommand(Command):
@@ -175,29 +176,51 @@ def test_command_creates_template_environment():
     assert_called_flag(command)
 
 def test_command_renders_template_string():
-    """Test that command renders a template"""
-    class FakeCommand(Command):
-        name = 'test'
-        def run(self, *args, **kwargs):
-            self.called = True
-            assert command.render_template_string(
-                    '{{ command.name }}') == 'test'
-            assert command.render_template_string(
-                    '{{ options }}') == 'options'
-    command = FakeCommand()
-    return_code = command.execute('options')
-    assert return_code == 0
-    assert_called_flag(command)
+    """Test that command renders a template string"""
+    with temp_template_environment(fixture_path('templates')):
+        class FakeCommand(Command):
+            name = 'test'
+            def run(self, *args, **kwargs):
+                self.called = True
+                assert self.render_template_string(
+                        '{{ command.name }}') == 'test'
+                assert self.render_template_string(
+                        '{{ options }}') == 'options'
+                assert self.render_template_string(
+                        '{{ testvalue }}', testvalue='foo') == 'foo'
+        command = FakeCommand()
+        return_code = command.execute('options')
+        assert return_code == 0
+        assert_called_flag(command)
 
 def test_command_renders_template():
-    """Test that command renders a template"""
-    class FakeCommand(Command):
-        name = 'test'
-        def run(self, *args, **kwargs):
-            self.called = True
-            assert command.render_template(
-                    'tests/test_template.sh.jinja') == 'test::options'
-    command = FakeCommand()
-    return_code = command.execute('options')
-    assert return_code == 0
-    assert_called_flag(command)
+    """Test that command renders a template file"""
+    with temp_template_environment(fixture_path('templates')):
+        class FakeCommand(Command):
+            name = 'test'
+            def run(self, *args, **kwargs):
+                self.called = True
+                assert self.render_template(
+                        'tests/test_template.sh.jinja') == 'test::options'
+                assert self.render_template(
+                        'tests/test_with_context.sh.jinja', 
+                        testvalue='bar') == 'bar'
+        command = FakeCommand()
+        return_code = command.execute('options')
+        assert return_code == 0
+        assert_called_flag(command)
+
+@fudge.patch('virtstrap.basecommand.Project')
+def test_project_command_renders_template(FakeProject):
+    """Test that a project command adds current project to the context"""
+    (FakeProject.expects('load')
+            .with_args('options').returns('proj'))
+    with temp_template_environment(fixture_path('templates')):
+        class FakeCommand(ProjectCommand):
+            name = 'test'
+            def run(self, project, options):
+                assert self.render_template_string('{{ project }}') == 'proj'
+                assert self.render_template(
+                        'tests/test_project_template.sh.jinja') == 'proj'
+        command = FakeCommand()
+        assert command.execute('options', test='test') == 0

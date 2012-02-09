@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
 from jinja2 import Environment
-from virtstrap.project import Project
 from virtstrap.log import logger
+from virtstrap.templating import environment
+from virtstrap.project import Project
 
 __all__ = ['Command', 'ProjectMixin', 'ProjectCommand']
 
@@ -31,25 +32,27 @@ class Command(object):
             self.options = None
         return 0
 
-    def render_template_string(self, source):
+    def render_template_string(self, source, **context):
         """Render's a string using Jinja2 templates"""
         env = self.template_environment()
         template = env.from_string(source)
-        context = dict(command=self, options=self.options)
-        return template.render(context)
+        return self._render(template, context)
 
-    def render_template(self, template_name):
+    def render_template(self, template_name, **context):
         env = self.template_environment()
         template = env.get_template(template_name)
-        context = dict(command=self, options=self.options)
-        return template.render(context)
+        return self._render(template, context)
+
+    def template_context(self):
+        return dict(options=self.options, command=self)
 
     def template_environment(self):
-        from tests import fixture_path
-        from jinja2 import FileSystemLoader
-        template_path = fixture_path('templates')
-        loader = FileSystemLoader(template_path)
-        return Environment(loader=loader)
+        return environment()
+
+    def _render(self, template, context):
+        base_context = self.template_context()
+        base_context.update(context)
+        return template.render(base_context)
 
     def run(self, options):
         raise NotImplementedError('This command does nothing')
@@ -62,6 +65,7 @@ class ProjectCommand(Command, ProjectMixin):
     def execute(self, options, project=None, **kwargs):
         if not project:
             project = self.load_project(options)
+        self.project = project
         self.logger.info('Running "%s" command' % self.name)
         try:
             self.run(project, options)
@@ -69,7 +73,14 @@ class ProjectCommand(Command, ProjectMixin):
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
             return 2
+        finally:
+            self.project = None
         return 0
+
+    def template_context(self):
+        base_dict = super(ProjectCommand, self).template_context()
+        base_dict.update(dict(project=self.project))
+        return base_dict
 
     def run(self, project):
         raise NotImplementedError('This command does nothing')
