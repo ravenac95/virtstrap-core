@@ -1,3 +1,12 @@
+"""
+virtstrap.runner
+----------------
+
+The main runner for the virtstrap application. If you wish to call
+virtstrap from within your program. The simplest way would be to use
+the runner and feed it the arguments.
+"""
+
 import sys
 from optparse import OptionParser
 from virtstrap.log import logger, setup_logger

@@ -5,6 +5,7 @@ virtstrap.basecommand
 This module contains both the Command and ProjectCommand classes. These
 classes are used for creating new commands in virtstrap.
 """
+
 from argparse import ArgumentParser
 from jinja2 import Environment
 from virtstrap.log import logger

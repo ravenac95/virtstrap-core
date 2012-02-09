@@ -1,3 +1,11 @@
+"""
+virtstrap.log
+-------------
+
+Provides a central logging facility. It is used to record log info
+and report both to a log file and stdout
+"""
+
 import logging
 
 logging.basicConfig(filename=".virtstrap.log", 

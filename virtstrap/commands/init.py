@@ -1,3 +1,9 @@
+"""
+virtstrap.commands.init
+-----------------------
+
+The 'init' command
+"""
 import os
 from argparse import ArgumentParser
 import virtualenv

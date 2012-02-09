@@ -1,7 +1,12 @@
 """
 virtstrap.project
 -----------------
+
+This module contains all the abstractions for dealing with a Project. 
+Using this object simplifies creating commands that are used to manage
+the project.
 """
+
 import os
 from virtstrap import constants
 from virtstrap.config import VirtstrapConfig

@@ -1,6 +1,6 @@
 """
 Test Base Command
-=================
+-----------------
 """
 import fudge
 from nose.tools import *

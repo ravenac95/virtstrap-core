@@ -1,9 +1,11 @@
 """
-Command and Plugin Registry
-===========================
+virtstrap.registry
+------------------
 
-This allows you to register many commands in a number of locations.
+Defines a command and plugin registry. This allows you to register many 
+commands in a number of locations.
 """
+
 from virtstrap.options import parser_from_commands
 
 class CommandAlreadyExists(Exception):

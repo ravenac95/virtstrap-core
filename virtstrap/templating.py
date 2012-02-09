@@ -1,3 +1,10 @@
+"""
+virtstrap.templating
+--------------------
+
+Defines tools for dealing with templating.
+"""
+
 from contextlib import contextmanager
 from jinja2 import Environment, PackageLoader, FileSystemLoader
 
@@ -15,6 +22,11 @@ def environment():
 
 @contextmanager
 def temp_template_environment(directory):
+    """Provide a template environment for testing
+
+    This creates a template environment based on the passed in directory.
+    It will save and replace the global environment.
+    """
     global _global_environment
     original_environment = None
     if _global_environment:

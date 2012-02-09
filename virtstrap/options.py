@@ -1,7 +1,10 @@
 """
-Command line options
-====================
+virtstrap.options
+-----------------
+
+Defines various tools for dealing with command line options.
 """
+
 import sys
 import pkg_resources
 from argparse import ArgumentParser
@@ -53,7 +56,10 @@ def create_base_parser():
     return parser
 
 def parser_from_commands(commands):
-    """Creates a parser from all the passed in commands"""
+    """Creates a parser from all the passed in commands
+
+    It does this by using multiple parents to create a brand new subparser
+    """
     base_parser = create_base_parser()
     top_parser = ArgumentParser(
         parents=[base_parser]

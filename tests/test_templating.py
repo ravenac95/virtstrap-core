@@ -1,3 +1,7 @@
+"""
+Test Templating
+---------------
+"""
 from jinja2 import Environment
 from virtstrap.templating import environment, temp_template_environment
 from tests import fixture_path
@@ -18,4 +22,3 @@ def test_test_environment_context():
         env.get_template('tests/test_template.sh.jinja')
     env = environment()
     template = env.get_template('init/activate.sh.jinja')
-    

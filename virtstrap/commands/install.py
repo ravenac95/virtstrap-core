@@ -1,3 +1,9 @@
+"""
+virtstrap.commands.install
+--------------------------
+
+The 'install' command
+"""
 import tempfile
 import subprocess
 from contextlib import contextmanager

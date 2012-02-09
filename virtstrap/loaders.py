@@ -1,3 +1,11 @@
+"""
+virtstrap.loaders
+-----------------
+
+Loads commands from various locations. Currently only loads 
+virtstrap.commands.*
+"""
+
 import os
 from virtstrap.log import logger
 

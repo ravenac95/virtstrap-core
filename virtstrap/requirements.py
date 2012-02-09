@@ -1,3 +1,10 @@
+"""
+virtstrap.requirements
+----------------------
+
+Defines classes to deal with sets of requirements. This is integral
+to the install command.
+"""
 from urlparse import urlparse
 from virtstrap.exceptions import RequirementsConfigError
 
