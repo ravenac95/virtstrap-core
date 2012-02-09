@@ -22,15 +22,16 @@ class Command(object):
     def execute(self, options, **kwargs):
         self.options = options
         self.logger.info('Running "%s" command' % self.name)
+        return_code = 0
         try:
             self.run(options)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
-            return 2
+            return_code = 2
         finally:
             self.options = None
-        return 0
+        return return_code
 
     def render_template_string(self, source, **context):
         """Render's a string using Jinja2 templates"""
@@ -67,15 +68,16 @@ class ProjectCommand(Command, ProjectMixin):
             project = self.load_project(options)
         self.project = project
         self.logger.info('Running "%s" command' % self.name)
+        return_code = 0
         try:
             self.run(project, options)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
-            return 2
+            return_code = 2
         finally:
             self.project = None
-        return 0
+        return return_code
 
     def template_context(self):
         base_dict = super(ProjectCommand, self).template_context()
