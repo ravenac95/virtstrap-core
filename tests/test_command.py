@@ -186,6 +186,7 @@ def test_command_renders_template_string():
                         '{{ command.name }}') == 'test'
                 assert self.render_template_string(
                         '{{ options }}') == 'options'
+                # Test with a user defined context
                 assert self.render_template_string(
                         '{{ testvalue }}', testvalue='foo') == 'foo'
         command = FakeCommand()
@@ -200,8 +201,10 @@ def test_command_renders_template():
             name = 'test'
             def run(self, *args, **kwargs):
                 self.called = True
+                # Test with the default context
                 assert self.render_template(
                         'tests/test_template.sh.jinja') == 'test::options'
+                # Test with a user defined context
                 assert self.render_template(
                         'tests/test_with_context.sh.jinja', 
                         testvalue='bar') == 'bar'
