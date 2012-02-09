@@ -3,9 +3,14 @@ source {{ project.bin_path('ve_activate') }}
 
 # Save the deactivate function from virtualenv under a different name
 virtualenv_original_deactivate=`typeset -f deactivate | sed 's/deactivate/virtualenv_deactivate/g'`
+
+# Eval the previously saved string to create 'virtualenv_deactivate'
 eval "$virtualenv_original_deactivate"
+
+# Remove the old deactivate
 unset -f deactivate >/dev/null 2>&1
 
+# Define a new one
 deactivate () {
     virtualenv_deactivate $1
 

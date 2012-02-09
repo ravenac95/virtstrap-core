@@ -69,7 +69,7 @@ class TestVirtstrapRunner(object):
         assert system_exit == True, "Runner didn't issue a system exit"
 
     def test_run_help(self):
-        """Run the help command"""
+        """Run help"""
         test_args = ['--help']
         system_exit = False
         try:
