@@ -1,0 +1,18 @@
+#!/bin/bash
+source {{ project.bin_path('ve_activate') }}
+
+# Save the deactivate function from virtualenv under a different name
+virtualenv_original_deactivate=`typeset -f deactivate | sed 's/deactivate/virtualenv_deactivate/g'`
+eval "$virtualenv_original_deactivate"
+unset -f deactivate >/dev/null 2>&1
+
+deactivate () {
+    virtualenv_deactivate $1
+
+    if [ ! "$1" = "nondestructive" ]
+    then
+        # Remove this function
+        unset -f virtualenv_deactivate >/dev/null 2>&1
+        unset -f deactivate >/dev/null 2>&1
+    fi
+}

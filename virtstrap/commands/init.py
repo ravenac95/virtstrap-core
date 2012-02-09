@@ -1,6 +1,7 @@
 import os
 from argparse import ArgumentParser
 import virtualenv
+import shutil
 from virtstrap import commands
 from virtstrap import constants
 
@@ -16,6 +17,7 @@ class InitializeCommand(commands.ProjectCommand):
 
     def run(self, project, options):
         self.create_virtualenv(project)
+        self.wrap_activate_script(project)
         self.create_quickactivate_script(project)
         commands.run('install', options, project=project)
 
@@ -35,12 +37,34 @@ class InitializeCommand(commands.ProjectCommand):
             # we have a link at the expected location.
             os.symlink(virtstrap_dir, expected_virtstrap_dir)
 
+    def wrap_activate_script(self, project):
+        """Creates a wrapper around the original activate script"""
+        self.logger.info('Wrapping original activate script')
+        # Copy old activate script
+        activate_path = project.bin_path('activate') # The normal path
+        old_activate_path = project.bin_path('ve_activate') # Dest path
+        shutil.copy(activate_path, old_activate_path)
+
+        # Using a template, create the new one
+        new_activate_script = self.render_template('init/activate.sh.jinja')
+        activate_file = open(activate_path, 'w')
+        activate_file.write(new_activate_script)
+
     def create_quickactivate_script(self, project):
-        """Create a quickactivate script"""
+        """Create a quickactivate script
+
+        This script is purely for convenience. Eventually it will be made
+        optional and something more convenient will be provided. However,
+        at this time. This makes it much easier than typing in
+
+            $ source .vs.env/bin/activate
+        """
         self.logger.info('Creating quick activate script')
-        quick_activate_path = project.path('quickactivate.sh')
+        quick_activate_path = project.path(constants.QUICK_ACTIVATE_FILENAME)
+        quick_activate_script = self.render_template(
+                'init/quickactivate.sh.jinja')
         quick_activate = open(quick_activate_path, 'w')
-        quick_activate.write("source")
+        quick_activate.write(quick_activate_script)
         quick_activate.close()
 
 commands.register(InitializeCommand)
