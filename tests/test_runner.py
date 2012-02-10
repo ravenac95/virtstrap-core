@@ -158,7 +158,7 @@ class TestVirtstrapRunner(object):
         with temp_pip_index(PACKAGES_DIR) as index_url:
             with in_temp_directory() as temp_dir:
                 # Create temp config file
-                vefile = open('VEfile', 'w')
+                vefile = open(constants.VE_FILENAME, 'w')
                 vefile.write(TEST_CONFIG)
                 vefile.close()
                 # If the config file was correctly written then 
@@ -167,7 +167,8 @@ class TestVirtstrapRunner(object):
                 # Do a loose check of the requirements
                 requirements = open('requirements.lock')
                 requirements_string = requirements.read()
-                expected_strings = ['test1', 'test5', 'test4']
+                expected_strings = ['test1==0.1', 'test5==1.4.3', 
+                        'test4==0.4.1', 'test2==1.3', 'test3==0.10.1']
                 for package in expected_strings:
                     assert package in requirements_string
                 assert return_code == 0
@@ -191,8 +192,6 @@ class TestVirtstrapRunner(object):
                 # Do a loose check of the requirements
                 requirements = open('requirements.lock')
                 requirements_string = requirements.read()
-                expected_strings = ['feedparser', 'werkzeug', 'requests', 
-                        'brownie']
                 expected_strings = ['test1', 'test5', 'test4']
                 for package in expected_strings:
                     assert package in requirements_string
@@ -206,7 +205,7 @@ class TestVirtstrapRunner(object):
         test_args = ['init', '--profiles=%s' % profiles]
         with temp_pip_index(PACKAGES_DIR) as index_url:
             with in_temp_directory() as temp_dir:
-                vefile = open('VEfile', 'w')
+                vefile = open(constants.VE_FILENAME, 'w')
                 vefile.write(TEST_CONFIG)
                 vefile.close()
                 return_code = self.runner.main(args=test_args)

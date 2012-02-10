@@ -45,7 +45,7 @@ def create_base_parser():
             action='store_true', default=False,
             help='do not use output colors')
     global_group.add_argument('-c', '--config-file', dest='config_file', 
-            action='store', default='VEfile',
+            action='store', default=constants.VE_FILENAME,
             help='specify a configuration file')
     global_group.add_argument('-p', '--profiles', dest='profiles', 
             action='store', help='specify a profile', type=list_str,

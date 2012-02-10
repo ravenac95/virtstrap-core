@@ -16,3 +16,6 @@ LOG_FILE = '.virtstrap.log'
 # This is a filename for the quickactivate script used as a shortcut to
 # activating a projects virtstrap environment
 QUICK_ACTIVATE_FILENAME = 'quickactivate'
+
+# Config file name
+VE_FILENAME = 'VEfile'
