@@ -8,7 +8,9 @@ the runner and feed it the arguments.
 """
 
 import sys
+import os
 from optparse import OptionParser
+from virtstrap import constants
 from virtstrap.log import logger, setup_logger
 from virtstrap.loaders import CommandLoader
 from virtstrap.commands import registry as main_registry
@@ -43,6 +45,10 @@ class VirtstrapRunner(object):
             logger.debug('Unknown command "%s"' % command)
             parser.error('"%s" is not a vstrap command. (use "vstrap help" '
                     'to see a list of commands)' % command)
+        if exit_code == EXIT_OK:
+            # TODO actually delete the correct log file
+            if os.path.exists(constants.LOG_FILE): 
+                os.remove(constants.LOG_FILE)
         return exit_code
 
     def handle_global_options(self, cli_args):

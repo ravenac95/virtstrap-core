@@ -5,9 +5,10 @@ virtstrap.commands.init
 The 'init' command
 """
 import os
+import subprocess
+import shutil
 from argparse import ArgumentParser
 import virtualenv
-import shutil
 from virtstrap import commands
 from virtstrap import constants
 
@@ -24,7 +25,7 @@ class InitializeCommand(commands.ProjectCommand):
     def run(self, project, options):
         self.create_virtualenv(project)
         self.wrap_activate_script(project)
-        self.create_quickactivate_script(project)
+        self.create_quick_activate_script(project)
         commands.run('install', options, project=project)
 
     def create_virtualenv(self, project):
@@ -43,6 +44,24 @@ class InitializeCommand(commands.ProjectCommand):
             # we have a link at the expected location.
             os.symlink(virtstrap_dir, expected_virtstrap_dir)
 
+        # Install virtstrap into virtualenv
+        # FIXME add later. with optimizations. This is really slow
+        # self.install_virtstrap(project)
+
+    def install_virtstrap(self, project):
+        pip_bin = project.bin_path('pip')
+        pip_command = 'install'
+        # TODO REMOVE dev once we're ready
+        # Add a test for this 
+        self.logger.debug('Installing virtstrap into environment')
+        process = subprocess.Popen([pip_bin, pip_command, 
+            'virtstrap==dev'], stdout=subprocess.PIPE)
+        return_code = process.wait()
+        if return_code != 0:
+            self.logger.error('Error installing virtstrap')
+            sys.exit(2)
+        
+
     def wrap_activate_script(self, project):
         """Creates a wrapper around the original activate script"""
         self.logger.info('Wrapping original activate script')
@@ -56,7 +75,7 @@ class InitializeCommand(commands.ProjectCommand):
         activate_file = open(activate_path, 'w')
         activate_file.write(new_activate_script)
 
-    def create_quickactivate_script(self, project):
+    def create_quick_activate_script(self, project):
         """Create a quickactivate script
 
         This script is purely for convenience. Eventually it will be made
