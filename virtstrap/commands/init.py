@@ -5,10 +5,10 @@ virtstrap.commands.init
 The 'init' command
 """
 import os
+import sys
 import subprocess
 import shutil
 from argparse import ArgumentParser
-import virtualenv
 from virtstrap import commands
 from virtstrap import constants
 
@@ -30,6 +30,15 @@ class InitializeCommand(commands.ProjectCommand):
 
     def create_virtualenv(self, project):
         """Create virtual environment in the virtstrap directory"""
+        virtstrap_env = os.environ.get('VIRTSTRAP_ENV')
+        virtstrap_dev_env = os.environ.get('VIRTSTRAP_DEV_ENV')
+        # the init command cannot be run in virtstrap environment
+        if virtstrap_env and not virtstrap_dev_env:
+            self.logger.error('init command cannot be run from inside a ' 
+                'virtstrap environment unless the environment variable '
+                '"VIRTSTRAP_DEV_ENV" is set.')
+            sys.exit(2)
+        import virtualenv
         virtstrap_dir = project.env_path()
         project_name = project.name
         self.logger.info('Creating virtualenv in %s for "%s"' % (
@@ -46,22 +55,38 @@ class InitializeCommand(commands.ProjectCommand):
 
         # Install virtstrap into virtualenv
         # FIXME add later. with optimizations. This is really slow
-        # self.install_virtstrap(project)
+        self.install_virtstrap(project)
 
     def install_virtstrap(self, project):
+        try:
+            import virtstrap_support
+        except ImportError:
+            self.logger.error('Virtstrap is improperly installed or '
+                    'being called from inside another virtstrap. Please '
+                    'check your installation.')
+            sys.exit(2)
         pip_bin = project.bin_path('pip')
         pip_command = 'install'
+        # Set the directory to the correct files
+        pip_find_links = ('--find-links=file://%s' % 
+                virtstrap_support.file_directory())
+        command = [pip_bin, pip_command, pip_find_links, '--no-index', 
+                'virtstrap']
         # TODO REMOVE dev once we're ready
         # Add a test for this 
-        self.logger.debug('Installing virtstrap into environment')
-        process = subprocess.Popen([pip_bin, pip_command, 
-            'virtstrap==dev'], stdout=subprocess.PIPE)
+        self.logger.debug('Installing virtstrap into environment with %s' %
+                " ".join(command))
+        pip_env = os.environ.copy()
+        pip_env.pop('VIRTSTRAP_DEV_ENV', None)
+        pip_env['VIRTSTRAP_ENV'] = project.env_path()
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, 
+                env=pip_env)
         return_code = process.wait()
         if return_code != 0:
-            self.logger.error('Error installing virtstrap')
+            self.logger.error('Error installing virtstrap in '
+                    'virtual environment')
             sys.exit(2)
         
-
     def wrap_activate_script(self, project):
         """Creates a wrapper around the original activate script"""
         self.logger.info('Wrapping original activate script')
