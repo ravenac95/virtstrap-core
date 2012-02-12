@@ -6,7 +6,12 @@ VirtstrapConfig is an interface to the VEfile. It collects the VEfile's
 settings between all the applicable profiles. It provides a way to query
 for a compiled section of data within the VirtstrapConfig.
 """
-import yaml
+try:
+    # First try to use PyYAML
+    import yaml
+except ImportError:
+    # Fallback to simpleyaml if PyYAML isn't found
+    import simpleyaml as yaml
 
 class ConfigurationError(Exception):
     pass

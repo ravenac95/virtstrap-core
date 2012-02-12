@@ -12,17 +12,17 @@ VERSION = "0.3.0-alpha"
 
 # Installation requirements
 REQUIREMENTS = [
-    'pyyaml',
     'jinja2',
+    'simpleyaml',
 ]
 
 if sys.version_info < (2, 7):
     REQUIREMENTS.append('argparse>=1.2.1')
 
-# Install the virtstrap support files
+# Install the virtstrap support files and virtualenv
 # if not in a virtstrap environment
 # or if inside a virtstrap development environment.
-# FIXME? this feels like too much of a hack. We should separate 
+# FIXME? this feels like too much of a hack. Maybe we should separate 
 # virtstrap into multiple packages (one wrapper and one core)
 if not os.environ.get('VIRTSTRAP_ENV') or \
     os.environ.get('VIRTSTRAP_DEV_ENV'):

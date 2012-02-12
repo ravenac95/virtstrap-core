@@ -83,8 +83,9 @@ class InitializeCommand(commands.ProjectCommand):
                 env=pip_env)
         return_code = process.wait()
         if return_code != 0:
-            self.logger.error('Error installing virtstrap in '
-                    'virtual environment')
+            self.logger.error('pip experienced an error installing virtstrap '
+                    'in the new virtual environment')
+            self.logger.error(process.stdout.read())
             sys.exit(2)
         
     def wrap_activate_script(self, project):

@@ -8,6 +8,7 @@ import os
 import sys
 import fudge
 from cStringIO import StringIO
+from tests import fixture_path
 from tests.tools import *
 from nose.tools import raises
 from nose.plugins.attrib import attr
@@ -103,26 +104,32 @@ class TestVirtstrapRunner(object):
         This test is pretty much identical to test_run_init
         it's performed in a project directory that isn't the CWD
         """
-        with temp_directory() as temp_dir:
-            # Run the init to a project directory
-            test_args = ['init', temp_dir] 
-            
-            return_code = self.runner.main(args=test_args)
-
-            # Grab paths for testing
-            virtual_environment_path = os.path.join(temp_dir, '.vs.env')
-            quick_activate_path = os.path.join(temp_dir, 
-                    constants.QUICK_ACTIVATE_FILENAME)
-
-            # Make sure everything exists
-            assert os.path.exists(virtual_environment_path) == True
-            assert os.path.exists(quick_activate_path) == True
-
-            # Make sure quickactivate source's the activate script
-            quick_activate = open(quick_activate_path)
-            quick_activate_text = quick_activate.read()
-            assert 'source' in quick_activate_text.strip()
-            assert return_code == 0
+        # FIXME?
+        # In order for this test to work. It cannot be in the 
+        # Current development directory due to egg_info existing
+        # for virtstrap within this directory. So for now we CD to
+        # the fixture path
+        with in_directory(fixture_path()):
+            with temp_directory() as temp_dir:
+                # Run the init to a project directory
+                test_args = ['init', temp_dir] 
+                
+                return_code = self.runner.main(args=test_args)
+    
+                # Grab paths for testing
+                virtual_environment_path = os.path.join(temp_dir, '.vs.env')
+                quick_activate_path = os.path.join(temp_dir, 
+                        constants.QUICK_ACTIVATE_FILENAME)
+    
+                # Make sure everything exists
+                assert os.path.exists(virtual_environment_path) == True
+                assert os.path.exists(quick_activate_path) == True
+    
+                # Make sure quickactivate source's the activate script
+                quick_activate = open(quick_activate_path)
+                quick_activate_text = quick_activate.read()
+                assert 'source' in quick_activate_text.strip()
+                assert return_code == 0
 
     @attr('slow')
     def test_run_init_env_different_directory(self):
