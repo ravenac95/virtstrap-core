@@ -108,7 +108,6 @@ def test_temp_project():
         assert isinstance(project, FakeProject)
     assert not os.path.exists(temp_dir)
 
-
 def test_context_user():
     from contextlib import contextmanager
     test_dict = dict(value='before')
