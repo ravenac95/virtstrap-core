@@ -78,6 +78,9 @@ class Project(object):
         """Grabs processed section data"""
         return self._config.processed(section)
 
+class NoProjectFound(Exception):
+    pass
+
 def find_project_dir(current_dir=None):
     """Finds the project directory for the current directory"""
     current_dir = current_dir or os.path.abspath(os.curdir)
@@ -86,6 +89,8 @@ def find_project_dir(current_dir=None):
         if os.path.islink(vs_dir) or os.path.isdir(vs_dir):
             return current_dir
     parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
+    if parent_dir == current_dir:
+        raise NoProjectFound('No project found')
     return find_project_dir(parent_dir)
 
 class ProjectNameProcessor(object):

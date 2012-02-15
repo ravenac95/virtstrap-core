@@ -1,4 +1,5 @@
 import sys
+import subprocess
 
 # This code is taken from werkzeug.utils
 # Copyright of the Werkzeug Team under the BSD license
@@ -87,3 +88,16 @@ class ImportStringError(ImportError):
     def __repr__(self):
         return '<%s(%r, %r)>' % (self.__class__.__name__, self.import_name,
                                  self.exception)
+
+def call_subprocess(command, show_stdout=False, filter_stdout=None):
+    """Subprocess caller inspired by pip"""
+    if show_stdout:
+        stdout = None
+    else:
+        stdout = subprocess.PIPE
+
+    process = subprocess.Popen(command, stdout=stdout, 
+            stderr=subprocess.STDOUT)
+
+    process = subprocess.Popen(command, show_stdout=True)
+    

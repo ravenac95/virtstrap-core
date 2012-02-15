@@ -42,11 +42,7 @@ setup(
     zip_safe=False,
     platforms='*nix',
     install_requires=REQUIREMENTS,
-    entry_points={
-        'console_scripts': [
-            'vstrap = virtstrap.runner:main',
-        ],
-    },
+    entry_points={},
     classifiers = [
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
