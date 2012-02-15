@@ -37,6 +37,3 @@ class CleanCommand(commands.ProjectCommand):
         if os.path.exists(quick_activate_path) and \
                 os.path.isfile(quick_activate_path):
             os.remove(quick_activate_path)
-
-commands.register(CleanCommand)
-

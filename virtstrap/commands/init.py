@@ -117,5 +117,3 @@ class InitializeCommand(commands.ProjectCommand):
         quick_activate = open(quick_activate_path, 'w')
         quick_activate.write(quick_activate_script)
         quick_activate.close()
-
-commands.register(InitializeCommand)

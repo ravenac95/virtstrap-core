@@ -11,18 +11,18 @@ import sys
 import os
 from optparse import OptionParser
 from virtstrap import constants
+from virtstrap import commands
 from virtstrap.log import logger, setup_logger
 from virtstrap.loaders import CommandLoader
-from virtstrap.commands import registry as main_registry
-from virtstrap.registry import CommandDoesNotExist
+from virtstrap.registry import CommandDoesNotExist, CommandRegistry
 
 EXIT_FAIL = 1
 EXIT_OK = 0
 
 class VirtstrapRunner(object):
     """Routes command line to different commands"""
-    def __init__(self):
-        self.registry = main_registry
+    def __init__(self, registry=None):
+        self.registry = registry
 
     def set_registry(self, registry):
         self.registry = registry
@@ -45,6 +45,8 @@ class VirtstrapRunner(object):
             logger.debug('Unknown command "%s"' % command)
             parser.error('"%s" is not a vstrap command. (use "vstrap help" '
                     'to see a list of commands)' % command)
+        finally:
+            self.close_context()
         if exit_code == EXIT_OK:
             # TODO actually delete the correct log file
             if os.path.exists(constants.LOG_FILE): 
@@ -57,8 +59,16 @@ class VirtstrapRunner(object):
 
     def load_commands(self):
         """Tell loader to load commands"""
+        registry = CommandRegistry()
+        self.registry = registry
+        commands.registry = registry
         command_loader = CommandLoader()
         command_loader.load()
+
+    def close_context(self):
+        """Removes the registry from the commands"""
+        self.registry = None
+        commands.registry = None
 
     def create_parser(self):
         return self.registry.create_cli_parser()

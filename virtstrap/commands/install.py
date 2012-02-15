@@ -60,5 +60,3 @@ class InstallCommand(commands.ProjectCommand):
         requirements_lock = open(project.path('requirements.lock'), 'w')
         requirements_lock.write(requirements)
         requirements_lock.close()
-
-commands.register(InstallCommand)

@@ -26,7 +26,3 @@ class InfoCommand(commands.ProjectCommand):
         self.logger.info('Project Path: %s' % project.path())
         self.logger.info('Project Environment Path: %s' % project.env_path())
         self.logger.info('Project Bin Path: %s' % project.bin_path())
-
-commands.register(InfoCommand)
-
-
