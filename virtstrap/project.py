@@ -10,6 +10,7 @@ the project.
 import os
 from virtstrap import constants
 from virtstrap.config import VirtstrapConfig
+from virtstrap.utils import call_subprocess
 
 VIRTSTRAP_DIR = constants.VIRTSTRAP_DIR
 
@@ -70,13 +71,18 @@ class Project(object):
     def bin_path(self, *paths):
         """Create a path relative to the virtstrap-dir's bin directory"""
         return self.env_path('bin', *paths)
-    
+
     def process_config_section(self, section, processor):
         return self._config.process_section(section, processor)
 
     def config(self, section):
         """Grabs processed section data"""
         return self._config.processed(section)
+
+    def call_bin(self, command_name, args, **options):
+        commands = [self.bin_path(command_name)]
+        commands.extend(args)
+        call_subprocess(commands, **options)
 
 class NoProjectFound(Exception):
     pass
@@ -99,4 +105,3 @@ class ProjectNameProcessor(object):
 
     def __call__(self, project_name):
         return project_name or os.path.basename(self._project_dir)
-

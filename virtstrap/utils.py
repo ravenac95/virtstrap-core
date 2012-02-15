@@ -1,8 +1,8 @@
 import sys
 import subprocess
+from virtstrap.log import logger as main_logger
 
-# This code is taken from werkzeug.utils
-# Copyright of the Werkzeug Team under the BSD license
+# The following function is taken from werkzeug.utils
 def import_string(import_name, silent=False):
     """Imports an object based on a string.  This is useful if you want to
     use import paths as endpoints or something similar.  An import path can
@@ -45,8 +45,7 @@ def import_string(import_name, silent=False):
         if not silent:
             raise ImportStringError(import_name, e), None, sys.exc_info()[2]
 
-# This code is taken from werkzeug.utils
-# Copyright of the Werkzeug Team under the BSD license
+# The following class is taken from werkzeug.utils
 class ImportStringError(ImportError):
     """Provides information about a failed :func:`import_string` attempt."""
 
@@ -89,15 +88,90 @@ class ImportStringError(ImportError):
         return '<%s(%r, %r)>' % (self.__class__.__name__, self.import_name,
                                  self.exception)
 
-def call_subprocess(command, show_stdout=False, filter_stdout=None):
-    """Subprocess caller inspired by pip"""
+# The following function is modified from virtualenv
+def call_subprocess(cmd, show_stdout=True,
+                    filter_stdout=None, cwd=None,
+                    raise_on_returncode=True, extra_env=None,
+                    remove_from_env=None, logger=None, 
+                    python_unbuffered=False):
+    logger = logger or main_logger
+    cmd_parts = []
+    for part in cmd:
+        if len(part) > 45:
+            part = part[:20]+"..."+part[-20:]
+        if ' ' in part or '\n' in part or '"' in part or "'" in part:
+            part = '"%s"' % part.replace('"', '\\"')
+        if hasattr(part, 'decode'):
+            try:
+                part = part.decode(sys.getdefaultencoding())
+            except UnicodeDecodeError:
+                part = part.decode(sys.getfilesystemencoding())
+        cmd_parts.append(part)
+    cmd_desc = ' '.join(cmd_parts)
     if show_stdout:
         stdout = None
     else:
         stdout = subprocess.PIPE
-
-    process = subprocess.Popen(command, stdout=stdout, 
-            stderr=subprocess.STDOUT)
-
-    process = subprocess.Popen(command, show_stdout=True)
-    
+    logger.debug("Running command %s" % cmd_desc)
+    if extra_env or remove_from_env or python_unbuffered:
+        env = os.environ.copy()
+        if extra_env:
+            env.update(extra_env)
+        if remove_from_env:
+            for varname in remove_from_env:
+                env.pop(varname, None)
+        if python_unbuffered:
+            # Set this if you'd like to process each line of code
+            # from the process immediately. This only works with
+            # software that is python.
+            env['PYTHONUNBUFFERED'] = 'unbuffered'
+    else:
+        env = None
+    try:
+        proc = subprocess.Popen(
+            cmd, stderr=subprocess.STDOUT, stdin=None, stdout=stdout,
+            cwd=cwd, env=env)
+    except Exception:
+        e = sys.exc_info()[1]
+        logger.fatal(
+            "Error %s while executing command %s" % (e, cmd_desc))
+        raise
+    all_output = []
+    if stdout is not None:
+        stdout = proc.stdout
+        encoding = sys.getdefaultencoding()
+        fs_encoding = sys.getfilesystemencoding()
+        while 1:
+            line = stdout.readline()
+            try:
+                line = line.decode(encoding)
+            except UnicodeDecodeError:
+                line = line.decode(fs_encoding)
+            if not line:
+                break
+            line = line.rstrip()
+            all_output.append(line)
+            if filter_stdout:
+                level = filter_stdout(line)
+                if isinstance(level, tuple):
+                    level, line = level
+                logger.log(level, line)
+                if not logger.stdout_level_matches(level):
+                    logger.show_progress()
+            else:
+                logger.info(line)
+    else:
+        proc.communicate()
+    proc.wait()
+    if proc.returncode:
+        if raise_on_returncode:
+            if all_output:
+                logger.notify('Complete output from command %s:' % cmd_desc)
+                logger.notify('\n'.join(all_output) + '\n----------------------------------------')
+            raise OSError(
+                "Command %s failed with error code %s"
+                % (cmd_desc, proc.returncode))
+        else:
+            logger.warn(
+                "Command %s had error code %s"
+                % (cmd_desc, proc.returncode))

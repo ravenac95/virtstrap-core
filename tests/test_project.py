@@ -1,9 +1,10 @@
 import fudge
 from fudge.inspector import arg
 from fudge.patcher import patch_object
+from nose.tools import raises
 from tests import fixture_path
 from tests.tools import *
-from virtstrap.project import Project, find_project_dir, ProjectNameProcessor
+from virtstrap.project import *
 from virtstrap.options import create_base_parser
 
 def test_initialize_project():
@@ -53,7 +54,7 @@ class BaseProjectTest(object):
         # Restore to state before patching
         self.config_patch.restore()
 
-class TestProjectDirectoriesDefined(BaseProjectTest):
+class TestProjectAllDirectoriesDefined(BaseProjectTest):
     def setup(self):
         option_overrides = dict(virtstrap_dir='/vsdir', 
             project_dir='/projdir')
@@ -99,6 +100,7 @@ class TestProjectOnlyProjectDirectoryDefined(BaseProjectTest):
         assert project.bin_path('a', 'b') == '/projdir/.vs.env/bin/a/b'
 
 class TestProjectGeneral(BaseProjectTest):
+    """General Tests for Project"""
     def setup(self):
         # this is necessary
         self.base_setup(dict(project_dir='/projdir'))
@@ -116,6 +118,18 @@ class TestProjectGeneral(BaseProjectTest):
                 .with_args('test')
                 .returns('test_data'))
         assert self.project.config('test') == 'test_data'
+
+    @fudge.patch('virtstrap.project.call_subprocess')
+    def test_call_bin(self, fake_call_subprocess):
+        """Test that project can call a bin"""
+        (fake_call_subprocess.expects_call()
+            .with_args(['/projdir/.vs.env/bin/cmd', 'arg1', 'arg2'])
+            .next_call()
+            .with_args(['/projdir/.vs.env/bin/cmd', 'arg1'], show_stdout=False)
+            )
+        project = self.project
+        project.call_bin('cmd', ['arg1', 'arg2'])
+        project.call_bin('cmd', ['arg1'], show_stdout=False)
 
 class TestProjectOnlyProjectDirectoryRelativelyDefined(BaseProjectTest):
     def test_project_path(self):
@@ -149,3 +163,9 @@ def test_find_project_directory_from_sample_project():
     with in_directory(fake_project_sub_directory):
         project_dir = find_project_dir()
         assert project_dir == fixture_path('sample_project')
+
+@raises(NoProjectFound)
+def test_find_project_directory_does_not_exist():
+    """Test that find_project_dir raises an error when no project is found"""
+    with in_temp_directory() as temp_directory:
+        project_dir = find_project_dir()
