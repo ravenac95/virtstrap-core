@@ -1,6 +1,6 @@
 nose
 virtualenv
-pyyaml
+simpleyaml
 fudge
 pypiserver
 jinja2
