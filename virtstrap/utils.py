@@ -1,4 +1,5 @@
 import sys
+import os
 import subprocess
 from virtstrap.log import logger as main_logger
 

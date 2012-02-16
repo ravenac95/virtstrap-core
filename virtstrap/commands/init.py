@@ -6,7 +6,6 @@ The 'init' command
 """
 import os
 import sys
-import subprocess
 import shutil
 from argparse import ArgumentParser
 from virtstrap import commands
@@ -65,27 +64,23 @@ class InitializeCommand(commands.ProjectCommand):
                     'being called from inside another virtstrap. Please '
                     'check your installation.')
             sys.exit(2)
-        pip_bin = project.bin_path('pip')
-        pip_command = 'install'
         # Set the directory to the correct files
+        pip_bin = 'pip'
+        pip_command = 'install'
         pip_find_links = ('--find-links=file://%s' % 
                 virtstrap_support.file_directory())
-        command = [pip_bin, pip_command, pip_find_links, '--no-index', 
+        pip_args = [pip_command, pip_find_links, '--no-index', 
                 'virtstrap']
         # TODO REMOVE dev once we're ready
         # Add a test for this 
-        self.logger.debug('Installing virtstrap into environment with %s' %
-                " ".join(command))
-        pip_env = os.environ.copy()
-        pip_env.pop('VIRTSTRAP_DEV_ENV', None)
-        pip_env['VIRTSTRAP_ENV'] = project.env_path()
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, 
-                env=pip_env)
-        return_code = process.wait()
-        if return_code != 0:
-            self.logger.error('pip experienced an error installing virtstrap '
-                    'in the new virtual environment')
-            self.logger.error(process.stdout.read())
+        self.logger.debug('Installing virtstrap into environment')
+        extra_env = dict(VIRTSTRAP_ENV=project.env_path())
+        remove_from_env = ['VIRTSTRAP_DEV_ENV']
+        try:
+            project.call_bin(pip_bin, pip_args, extra_env=extra_env,
+                    remove_from_env=remove_from_env, show_stdout=False)
+        except OSError:
+            self.logger.error('An error occured with pip')
             sys.exit(2)
         
     def wrap_activate_script(self, project):
