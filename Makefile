@@ -6,8 +6,13 @@ test:
 ptest: 
 	nosetests -d --processes=8 --process-timeout=30
 
+# Verbose parallel testing
+ptestv: 
+	nosetests -d --processes=8 --process-timeout=30 -v
+
 quicktest:
 	nosetests -a '!slow' -d
 
-quicktest_verbose:
+# Verbose quick tests
+quicktestv:
 	nosetests -a '!slow' -d -v
