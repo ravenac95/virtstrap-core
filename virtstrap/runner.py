@@ -13,21 +13,23 @@ from optparse import OptionParser
 from virtstrap import constants
 from virtstrap import commands
 from virtstrap.log import logger, setup_logger
-from virtstrap.loaders import CommandLoader
+from virtstrap.loaders import CommandLoader, BuiltinCommandCollector
 from virtstrap.registry import CommandDoesNotExist, CommandRegistry
 
 EXIT_FAIL = 1
 EXIT_OK = 0
 
 def create_loader():
-    return CommandLoader()
+    collector = BuiltinCommandCollector('virtstrap.commands')
+    return CommandLoader(collectors=[collector])
 
 def create_registry():
     return CommandRegistry()
 
 class VirtstrapRunner(object):
     """Routes command line to different commands"""
-    def __init__(self, registry_factory=create_registry, loader_factory=create_loader):
+    def __init__(self, registry_factory=create_registry, 
+            loader_factory=create_loader):
         self._loader_factory = loader_factory
         self._loader = None
         
