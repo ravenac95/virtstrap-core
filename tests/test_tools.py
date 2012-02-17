@@ -1,5 +1,6 @@
 import os
 import urllib2
+from nose.tools import raises
 from nose.plugins.attrib import attr
 from virtstrap import constants
 from virtstrap.testing import *
@@ -122,3 +123,40 @@ def test_context_user():
     assert test_dict['value'] == 'during'
     ctx.exit()
     assert test_dict['value'] == 'after'
+
+
+@fudge.test
+def test_shunt_mixin():
+    """Create an object with the ShuntMixin"""
+    class FakeClass(ShuntMixin):
+        def my_method(self):
+            return "before-shunt"
+
+    obj = FakeClass()
+    assert obj.my_method() == 'before-shunt'
+
+    obj.__patch_method__('my_method').returns('after-shunt')
+    assert obj.my_method() == 'after-shunt'
+
+@raises(AssertionError)
+@fudge.test
+def test_shunt_mixin_raises_error():
+    class FakeClass(ShuntMixin):
+        def my_method(self):
+            return "before-shunt"
+
+    obj = FakeClass()
+    obj.__patch_method__('my_method').with_args('test')
+    obj.my_method()
+
+
+@fudge.test
+def test_shunt_mixin_has_no_expectation_on_patch():
+    class FakeClass(ShuntMixin):
+        def my_method(self):
+            return "before-shunt"
+
+    obj = FakeClass()
+    (obj.__patch_method__('my_method', expects_call=False).returns('test')
+                    .next_call().with_args('hello').returns('world'))
+    assert obj.my_method() == 'test'

@@ -1,3 +1,9 @@
+"""
+virtstrap.testing.project
+-------------------------
+
+Test tools for projects
+"""
 from contextlib import contextmanager
 import virtualenv
 import fudge
