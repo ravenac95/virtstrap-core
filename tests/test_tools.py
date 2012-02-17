@@ -2,7 +2,7 @@ import os
 import urllib2
 from nose.plugins.attrib import attr
 from virtstrap import constants
-from tests.tools import *
+from virtstrap.testing import *
 from tests import fixture_path
 
 def test_in_directory():

@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 import virtualenv
 import fudge
-from tests.tools import *
+from virtstrap.testing import *
 from virtstrap import constants
 from virtstrap.project import Project
 from virtstrap.options import create_base_parser

@@ -3,7 +3,7 @@ from fudge.inspector import arg
 from fudge.patcher import patch_object
 from nose.tools import raises
 from tests import fixture_path
-from tests.tools import *
+from virtstrap.testing import *
 from virtstrap.project import *
 from virtstrap.options import create_base_parser
 

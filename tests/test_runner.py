@@ -9,7 +9,7 @@ import sys
 import fudge
 from cStringIO import StringIO
 from tests import fixture_path
-from tests.tools import *
+from virtstrap.testing import *
 from nose.tools import raises
 from nose.plugins.attrib import attr
 from virtstrap import constants

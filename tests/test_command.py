@@ -5,7 +5,7 @@ Test Base Command
 import fudge
 from nose.tools import *
 from tests import fixture_path
-from tests.tools import *
+from virtstrap.testing import *
 from virtstrap.templating import temp_template_environment
 from virtstrap.basecommand import Command, ProjectMixin, ProjectCommand
 

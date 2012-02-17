@@ -7,7 +7,7 @@ Very high level tests for the virtstrap runner
 import os
 import sys
 import fudge
-from tests.tools import *
+from virtstrap.testing import *
 from nose.tools import raises
 from virtstrap.commands.init import InitializeCommand
 

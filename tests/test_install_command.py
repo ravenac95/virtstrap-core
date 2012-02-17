@@ -2,7 +2,7 @@ import fudge
 from fudge.patcher import patch_object
 from nose.plugins.attrib import attr
 from tests import fixture_path
-from tests.tools import *
+from virtstrap.testing import *
 from virtstrap.commands.install import InstallCommand
 
 PACKAGES_DIR = fixture_path('packages')
