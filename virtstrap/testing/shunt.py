@@ -9,3 +9,9 @@ class ShuntMixin(object):
             fake_method.is_callable()
         setattr(self, method_name, fake_method)
         return fake_method
+
+def shunt_class(Klass):
+    """Creates a shunt for any object"""
+    class ShuntClass(Klass, ShuntMixin):
+        pass
+    return ShuntClass

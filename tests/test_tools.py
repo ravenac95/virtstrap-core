@@ -95,6 +95,7 @@ def test_in_directory_raises_error():
     assert os.getcwd() == original_working_dir
 
 @attr('slow')
+@fudge.test
 def test_temp_project():
     from virtstrap.project import Project
     with temp_project() as info:
@@ -107,6 +108,9 @@ def test_temp_project():
         assert os.path.exists(project.bin_path('pip'))
         assert isinstance(project, Project)
         assert isinstance(project, FakeProject)
+        # Test the FakeProject
+        project.__patch_method__('bin_path').returns('hello')
+        assert project.bin_path() == 'hello'
     assert not os.path.exists(temp_dir)
 
 def test_context_user():
@@ -160,3 +164,19 @@ def test_shunt_mixin_has_no_expectation_on_patch():
     (obj.__patch_method__('my_method', expects_call=False).returns('test')
                     .next_call().with_args('hello').returns('world'))
     assert obj.my_method() == 'test'
+
+@fudge.test
+def test_shunt_class_factory_method():
+    class FakeClass(object):
+        def my_method(self):
+            return "before-shunt"
+    ShuntClass = shunt_class(FakeClass)
+    obj = ShuntClass()
+    assert obj.my_method() == 'before-shunt'
+
+    obj.__patch_method__('my_method').returns('after-shunt')
+    assert obj.my_method() == 'after-shunt'
+
+def test_fake_command():
+    FakeCommand = fake_command('init')
+    assert FakeCommand.name == 'init'
