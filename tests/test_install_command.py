@@ -34,7 +34,7 @@ class TestInstallCommand(object):
         project = self.project
         options = self.options
         temp_dir = self.temp_dir
-        fake_req_set = (project.patch_method('process_config_section')
+        fake_req_set = (project.__patch_method__('process_config_section')
                 .returns_fake())
         fake_req_set.expects('to_pip_str').returns("test1")
         self.command.run(project, options)
