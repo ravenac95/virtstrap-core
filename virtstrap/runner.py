@@ -19,13 +19,45 @@ from virtstrap.registry import CommandDoesNotExist, CommandRegistry
 EXIT_FAIL = 1
 EXIT_OK = 0
 
+def create_loader():
+    return CommandLoader()
+
+def create_registry():
+    return CommandRegistry()
+
 class VirtstrapRunner(object):
     """Routes command line to different commands"""
-    def __init__(self, registry=None):
-        self.registry = registry
+    def __init__(self, registry_factory=create_registry, loader_factory=create_loader):
+        self._loader_factory = loader_factory
+        self._loader = None
+        
+        # Set registry settings
+        self._registry_factory = registry_factory
+        self._registry = None
 
     def set_registry(self, registry):
-        self.registry = registry
+        self._registry = registry
+
+    def set_loader(self, loader):
+        self._loader = loader
+
+    @property
+    def registry(self):
+        """Lazily loads the registry"""
+        registry = self._registry
+        if not registry:
+            registry = self._registry_factory()
+            self._registry = registry
+        return registry
+
+    @property
+    def loader(self):
+        """Lazily loads the command loader"""
+        loader = self._loader
+        if not loader:
+            loader = self._loader_factory()
+            self._loader = loader
+        return loader
 
     def main(self, args=None):
         """Handles execution through command line interface"""
@@ -59,15 +91,16 @@ class VirtstrapRunner(object):
 
     def load_commands(self):
         """Tell loader to load commands"""
-        registry = CommandRegistry()
-        self.registry = registry
-        commands.registry = registry
-        command_loader = CommandLoader()
+        commands.registry = self.registry
+        command_loader = self.loader
         command_loader.load()
 
+    def list_commands(self):
+        return self.registry.list_commands()
+
     def close_context(self):
-        """Removes the registry from the commands"""
-        self.registry = None
+        """Removes the registry from commands.registry"""
+        self._registry = None
         commands.registry = None
 
     def create_parser(self):
@@ -78,7 +111,6 @@ class VirtstrapRunner(object):
         logger.debug('Command "%s" chosen' % name)
         options = cli_args
         return self.registry.run(name, options)
-
 
 def main(args=None):
     runner = VirtstrapRunner()

@@ -42,12 +42,41 @@ def test_initialize_runner():
     """Test that we can initialize the VirtstrapRunner"""
     runner = VirtstrapRunner()
 
+@fudge.test
+def test_runner_lazy_load_registry():
+    """Use a registry factory method to lazily load a registry"""
+    fake_registry_factory = fudge.Fake()
+    fake_registry_factory.expects_call().returns('reg')
+    runner = VirtstrapRunner(registry_factory=fake_registry_factory)
+    registry = runner.registry
+    runner.set_registry('regtest')
+    assert runner.registry == 'regtest'
+
+@fudge.test
+def test_runner_lazy_load_loader():
+    """Use a loader factory method to lazily load a loader"""
+    fake_loader_factory = fudge.Fake()
+    fake_loader_factory.expects_call().returns('regtest')
+    runner = VirtstrapRunner(loader_factory=fake_loader_factory)
+    loader = runner.loader
+    runner.set_loader('regtest')
+    assert runner.loader == 'regtest'
+
 class TestVirtstrapRunner(object):
     def setup(self):
         self.runner = VirtstrapRunner()
 
     def teardown(self):
         self.runner = None
+    
+    @fudge.test
+    def test_runner_lists_commands(self):
+        fake_registry = fudge.Fake()
+        (fake_registry.expects('list_commands')
+                .returns(['command1', 'command2']))
+        self.runner.set_registry(fake_registry)
+        commands = self.runner.list_commands()
+        assert commands == ['command1', 'command2']
 
     @fudge.test
     def test_runner_run_command(self):
