@@ -1,3 +1,4 @@
+import logging
 import subprocess
 from fudge.patcher import patch_object
 from functools import wraps
@@ -6,6 +7,8 @@ from virtstrap import utils
 original_subprocess_call = subprocess.call
 original_subprocess_popen = subprocess.Popen
 original_call_subprocess = utils.call_subprocess
+
+testing_logger = logging.getLogger('virtstrap.testing')
 
 def call_proxy(*args, **kwargs):
     """Force call to use the subprocess.PIPE"""
@@ -51,3 +54,14 @@ def hide_subprocess_stdout(f):
         call_sub_patch.restore()
         return return_value
     return decorated_function
+
+def call_and_capture(*args, **kwargs):
+    """Calls the original Popen and captures the stdout and stderr"""
+    kwargs['stdout'] = subprocess.PIPE
+    kwargs['stderr'] = subprocess.STDOUT
+    process = original_subprocess_popen(*args, **kwargs)
+    return_code = process.wait()
+    output = process.stdout.read()
+    testing_logger.debug('Called %s with output:' % args[0])
+    testing_logger.debug(output)
+    return output, return_code
