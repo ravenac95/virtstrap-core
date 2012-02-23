@@ -24,6 +24,15 @@ def list_str(string):
     return map(lambda a: a.strip(), string.split(','))
 
 def create_base_parser():
+    global_parser = create_global_parser()
+    project_parser = create_project_parser()
+    parser = ArgumentParser(
+        add_help=False,
+        parents=[global_parser, project_parser],
+    )
+    return parser
+
+def create_global_parser():
     """This is the basic parser that all parsers will inherit."""
     parser = ArgumentParser(
         add_help=False
@@ -37,22 +46,29 @@ def create_base_parser():
     global_group.add_argument('-l', '--log', dest='log_file', metavar='FILE',
             action='store', default=constants.LOG_FILE,
             help='log file')
-    global_group.add_argument('--virtstrap-dir', dest='virtstrap_dir', 
-            action='store', default=constants.VIRTSTRAP_DIR,
-            metavar='DIR',
-            help='the directory for the virtual environment')
     global_group.add_argument('--no-colored-output', dest='no_colored_output',
             action='store_true', default=False,
             help='do not use output colors')
-    global_group.add_argument('-c', '--config-file', dest='config_file', 
-            action='store', default=constants.VE_FILENAME,
-            help='specify a configuration file')
-    global_group.add_argument('-p', '--profiles', dest='profiles', 
+    return parser
+
+def create_project_parser():
+    parser = ArgumentParser(
+        add_help=False
+    )
+    project_group = parser.add_argument_group('project options')
+    project_group.add_argument('--virtstrap-dir', dest='virtstrap_dir',
+            action='store', default=constants.VIRTSTRAP_DIR,
+            metavar='DIR',
+            help='the directory for the virtual environment')
+    project_group.add_argument('--profiles', dest='profiles',
             action='store', help='specify a profile', type=list_str,
             default='development')
-    global_group.add_argument('--project-dir', dest='project_dir', 
+    project_group.add_argument('--project-dir', dest='project_dir',
             metavar='PROJECT_DIR',
             action='store', help='specify project directory')
+    project_group.add_argument('--config-file', dest='config_file',
+            action='store', default=constants.VE_FILENAME,
+            help='specify a configuration file')
     return parser
 
 def parser_from_commands(commands):

@@ -41,6 +41,10 @@ class CommandRegistry(object):
         command = command_class()
         return command.execute(options, **kwargs)
 
+    def list_commands(self):
+        """Return a list of command names"""
+        return map(lambda a: a[0], self.commands_iter())
+
     def print_command_help(self):
         """Display all the commands and their descriptions"""
         print('')

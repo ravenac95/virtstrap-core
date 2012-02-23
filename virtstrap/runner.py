@@ -19,11 +19,11 @@ from virtstrap.registry import CommandDoesNotExist, CommandRegistry
 EXIT_FAIL = 1
 EXIT_OK = 0
 
-def create_loader():
+def create_loader(*args):
     collector = BuiltinCommandCollector('virtstrap.commands')
     return CommandLoader(collectors=[collector])
 
-def create_registry():
+def create_registry(*args):
     return CommandRegistry()
 
 class VirtstrapRunner(object):
@@ -37,18 +37,23 @@ class VirtstrapRunner(object):
         self._registry_factory = registry_factory
         self._registry = None
 
+        self._args = []
+
     def set_registry(self, registry):
         self._registry = registry
 
     def set_loader(self, loader):
         self._loader = loader
 
+    def set_args(self, args):
+        self._args = args
+
     @property
     def registry(self):
         """Lazily loads the registry"""
         registry = self._registry
         if not registry:
-            registry = self._registry_factory()
+            registry = self._registry_factory(self._args)
             self._registry = registry
         return registry
 
@@ -57,13 +62,14 @@ class VirtstrapRunner(object):
         """Lazily loads the command loader"""
         loader = self._loader
         if not loader:
-            loader = self._loader_factory()
+            loader = self._loader_factory(self._args)
             self._loader = loader
         return loader
 
     def main(self, args=None):
         """Handles execution through command line interface"""
         # Load all of the available commands
+        self.set_args(args)
         self.load_commands()
         parser = self.create_parser()
         if not args:
@@ -108,11 +114,10 @@ class VirtstrapRunner(object):
     def create_parser(self):
         return self.registry.create_cli_parser()
 
-    def run_command(self, name, cli_args):
+    def run_command(self, name, cli_args, **kwargs):
         """Load command from virtstrap.commands"""
         logger.debug('Command "%s" chosen' % name)
-        options = cli_args
-        return self.registry.run(name, options)
+        return self.registry.run(name, cli_args, **kwargs)
 
 def main(args=None):
     runner = VirtstrapRunner()

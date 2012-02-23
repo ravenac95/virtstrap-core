@@ -19,3 +19,6 @@ QUICK_ACTIVATE_FILENAME = 'quickactivate'
 
 # Config file name
 VE_FILENAME = 'VEfile'
+
+# Default Profile
+DEFAULT_PROFILES = ['development']

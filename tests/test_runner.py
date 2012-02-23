@@ -60,6 +60,7 @@ def test_runner_lazy_load_loader():
     runner = VirtstrapRunner(loader_factory=fake_loader_factory)
     loader = runner.loader
     runner.set_loader('regtest')
+    # Test the injected loader
     assert runner.loader == 'regtest'
 
 class TestVirtstrapRunner(object):

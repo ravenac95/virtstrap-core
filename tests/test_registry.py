@@ -1,5 +1,6 @@
 import fudge
 from virtstrap.registry import CommandRegistry
+from virtstrap.testing import *
 
 def test_initialize_registry():
     registry = CommandRegistry()
@@ -54,4 +55,13 @@ class TestCommandRegistry(object):
         assert registry.run(*command_args, test='test') == 0
         assert FakeCommand.called
 
+    @fudge.test
+    def test_list_commands(self):
+        com1 = fake_command('com1')
+        com2 = fake_command('com2')
 
+        registry = self.registry
+        registry.register(com1)
+        registry.register(com2)
+
+        assert set(registry.list_commands()) == set(['com1', 'com2'])
