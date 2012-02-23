@@ -21,7 +21,7 @@ class InstallCommand(commands.ProjectCommand):
     name = 'install'
     description = "Installs the project's python requirements"
 
-    def run(self, project, options):
+    def run(self, project, options, **kwargs):
         requirement_set = self.get_requirement_set(project)
         if requirement_set:
             temp_reqs_path = self.write_temp_requirements_file(requirement_set)

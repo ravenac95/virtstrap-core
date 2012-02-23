@@ -30,7 +30,7 @@ def assert_called_flag(command, message=None):
 def test_assert_called_flag():
     """Test that the assert_called_flag function works"""
     class FakeCommand(object):
-        def run(self):
+        def run(self, **kwargs):
             self.called = True
     command = FakeCommand()
     asserted = False
@@ -111,7 +111,7 @@ def test_project_command_execute_ignores_kwargs(FakeProject):
             .with_args('options').returns('proj'))
     class FakeCommand(ProjectCommand):
         name = 'test'
-        def run(self, project, options):
+        def run(self, project, options, **kwargs):
             pass
     command = FakeCommand()
     assert command.execute('options', test='test') == 0
@@ -122,7 +122,7 @@ def test_project_command_execute_injected_project_kwargs(FakeProject):
     class FakeCommand(ProjectCommand):
         name = 'test'
 
-        def run(self, project, options):
+        def run(self, project, options, **kwargs):
             self.called = True
             assert project == 'project'
 
@@ -136,7 +136,7 @@ def test_project_command_runs_with_project(FakeProject):
     """Test ProjectCommand runs correctly"""
     class FakeProjectCommand(ProjectCommand):
         name = 'test'
-        def run(self, project, options):
+        def run(self, project, options, **kwargs):
             assert project == 'proj'
     (FakeProject.expects('load')
             .with_args('options').returns('proj'))
@@ -148,7 +148,7 @@ def test_project_command_runs_with_project_not_faked():
     """Test ProjectCommand in a sandbox"""
     class FakeProjectCommand(ProjectCommand):
         name = 'test'
-        def run(self, project, options):
+        def run(self, project, options, **kwargs):
             self.called = True
             assert project.name == 'sample_project'
             assert project.env_path().endswith('sample_project/.vs.env')
@@ -221,7 +221,7 @@ def test_project_command_renders_template(FakeProject):
     with temp_template_environment(fixture_path('templates')):
         class FakeCommand(ProjectCommand):
             name = 'test'
-            def run(self, project, options):
+            def run(self, project, options, **kwargs):
                 assert self.render_template_string('{{ project }}') == 'proj'
                 assert self.render_template(
                         'tests/test_project_template.sh.jinja') == 'proj'

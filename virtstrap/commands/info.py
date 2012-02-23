@@ -18,7 +18,7 @@ class InfoCommand(commands.ProjectCommand):
     name = 'info'
     description = 'Displays information about current project'
 
-    def run(self, project, options):
+    def run(self, project, options, **kwargs):
         self.display_info(project)
 
     def display_info(self, project):

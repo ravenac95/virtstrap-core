@@ -35,7 +35,7 @@ class Command(object):
         self.logger.debug('Running "%s" command' % self.name)
         return_code = 0
         try:
-            self.run(options)
+            self.run(options, **kwargs)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
@@ -71,7 +71,7 @@ class Command(object):
         base_context.update(context)
         return template.render(base_context)
 
-    def run(self, options):
+    def run(self, options, **kwargs):
         """Must be overriden by subclasses"""
         raise NotImplementedError('This command does nothing')
 
@@ -103,7 +103,7 @@ class ProjectCommand(Command, ProjectMixin):
         self.logger.info('Running "%s" command' % self.name)
         return_code = 0
         try:
-            self.run(project, options)
+            self.run(project, options, **kwargs)
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
@@ -117,6 +117,6 @@ class ProjectCommand(Command, ProjectMixin):
         base_dict.update(dict(project=self.project))
         return base_dict
 
-    def run(self, project, options):
+    def run(self, project, options, **kwargs):
         """Must be overriden by subclasses"""
         raise NotImplementedError('This command does nothing')

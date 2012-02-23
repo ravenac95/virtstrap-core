@@ -26,7 +26,7 @@ class TestCommandRegistry(object):
         class FakeCommand(Command):
             name = 'test'
             called = False
-            def run(self, options):
+            def run(self, options, **kwargs):
                 self.__class__.called = True
                 assert options == 'options'
 
@@ -45,7 +45,7 @@ class TestCommandRegistry(object):
         class FakeCommand(Command):
             name = 'test'
             called = False
-            def run(self, options):
+            def run(self, options, **kwargs):
                 self.__class__.called = True
                 assert options == 'options'
 

@@ -17,7 +17,7 @@ class CleanCommand(commands.ProjectCommand):
     name = 'clean'
     description = 'Remove virtstrap environment from your project'
 
-    def run(self, project, options):
+    def run(self, project, options, **kwargs):
         self.remove_virtstrap_environment(project)
         self.remove_quick_activate_script(project)
 
