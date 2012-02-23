@@ -32,7 +32,7 @@ class Command(object):
     def execute(self, options, **kwargs):
         """Wraps the user defined run method in the proper environment"""
         self.options = options
-        self.logger.info('Running "%s" command' % self.name)
+        self.logger.debug('Running "%s" command' % self.name)
         return_code = 0
         try:
             self.run(options)
