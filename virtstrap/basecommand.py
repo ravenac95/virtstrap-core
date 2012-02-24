@@ -100,7 +100,7 @@ class ProjectCommand(Command, ProjectMixin):
         if not project:
             project = self.load_project(options)
         self.project = project
-        self.logger.info('Running "%s" command' % self.name)
+        self.logger.debug('Running "%s" command' % self.name)
         return_code = 0
         try:
             self.run(project, options, **kwargs)
