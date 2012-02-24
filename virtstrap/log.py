@@ -5,11 +5,9 @@ virtstrap.log
 Provides a central logging facility. It is used to record log info
 and report both to a log file and stdout
 """
-
+import os
 import logging
-
-logging.basicConfig(filename=".virtstrap.log", 
-        level=logging.INFO, filemode="w")
+from virtstrap import constants
 
 CLINT_AVAILABLE = True
 try:
@@ -58,9 +56,15 @@ VERBOSITY_LEVELS = {
     3: logging.DEBUG,
 }
 
-def setup_logger(verbosity, no_colored_output=False):
+def setup_logger(verbosity, no_colored_output=False, log_file=None):
     """Sets up the logger for the program. DO NOT USE DIRECTLY IN COMMANDS"""
     verbosity_level = VERBOSITY_LEVELS.get(verbosity, logging.INFO)
+    if log_file:
+        # Copy the current log file
+        file_handler = logging.FileHandler(filename=log_file,
+                mode='w')
+        file_handler.setLevel(logging.DEBUG)
+        logger.addHandler(file_handler)
     if not verbosity_level:
         return
     outputter = ConsoleLogOutputter()
