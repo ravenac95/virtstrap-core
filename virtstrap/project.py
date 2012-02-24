@@ -80,9 +80,9 @@ class Project(object):
         return self._config.processed(section)
 
     def call_bin(self, command_name, args, **options):
-        commands = [self.bin_path(command_name)]
-        commands.extend(args)
-        call_subprocess(commands, **options)
+        command = [self.bin_path(command_name)]
+        command.extend(args)
+        return call_subprocess(command, **options)
 
 class NoProjectFound(Exception):
     pass

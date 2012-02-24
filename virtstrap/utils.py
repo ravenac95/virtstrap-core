@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+from cStringIO import StringIO
 from virtstrap.log import logger as main_logger
 
 # The following function is taken from werkzeug.utils
@@ -94,7 +95,13 @@ def call_subprocess(cmd, show_stdout=True,
                     filter_stdout=None, cwd=None,
                     raise_on_returncode=True, extra_env=None,
                     remove_from_env=None, logger=None, 
-                    python_unbuffered=False):
+                    python_unbuffered=False, 
+                    collect_stdout=False):
+    collected_stdout = None
+    stdout_receiver = None
+    if collect_stdout:
+        stdout_receiver = StringIO()
+        show_stdout = False
     logger = logger or main_logger
     cmd_parts = []
     for part in cmd:
@@ -157,18 +164,23 @@ def call_subprocess(cmd, show_stdout=True,
                 if isinstance(level, tuple):
                     level, line = level
                 logger.log(level, line)
+                # FIXME This is virtualenv specific. We need to get rid
+                # of it
                 if not logger.stdout_level_matches(level):
                     logger.show_progress()
             else:
-                logger.info(line)
+                if stdout_receiver: #Expects a file like object 
+                                    #for stdout_receiver
+                    stdout_receiver.write('%s\n' % line)
+                logger.debug(line)
     else:
         proc.communicate()
     proc.wait()
     if proc.returncode:
         if raise_on_returncode:
             if all_output:
-                logger.notify('Complete output from command %s:' % cmd_desc)
-                logger.notify('\n'.join(all_output) + '\n----------------------------------------')
+                logger.debug('Complete output from command %s:' % cmd_desc)
+                logger.debug('\n'.join(all_output) + '\n----------------------------------------')
             raise OSError(
                 "Command %s failed with error code %s"
                 % (cmd_desc, proc.returncode))
@@ -176,3 +188,7 @@ def call_subprocess(cmd, show_stdout=True,
             logger.warn(
                 "Command %s had error code %s"
                 % (cmd_desc, proc.returncode))
+    if stdout_receiver:
+        stdout_receiver.seek(0)
+        collected_stdout = stdout_receiver.read()
+    return collected_stdout
