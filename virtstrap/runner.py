@@ -95,7 +95,7 @@ class VirtstrapRunner(object):
 
     def handle_global_options(self, cli_args):
         setup_logger(cli_args.verbosity, 
-                cli_args.no_colored_output)
+                cli_args.no_colored_output, cli_args.log_file)
 
     def load_commands(self):
         """Tell loader to load commands"""
