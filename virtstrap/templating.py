@@ -8,7 +8,7 @@ Defines tools for dealing with templating.
 from contextlib import contextmanager
 from jinja2 import Environment, PackageLoader, FileSystemLoader
 
-__all__ = ['environment', 'test_template_enviroment']
+__all__ = ['environment', 'temp_template_environment']
 
 _global_environment = None
 
