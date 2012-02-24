@@ -22,3 +22,6 @@ VE_FILENAME = 'VEfile'
 
 # Default Profile
 DEFAULT_PROFILES = ['development']
+
+# BIN NAME FOR VIRTSTRAP WHEN INSIDE A PROJECT
+PROJECT_VIRTSTRAP_BIN_NAME = 'virtstrap-local'
