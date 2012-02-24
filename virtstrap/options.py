@@ -71,6 +71,23 @@ def create_project_parser():
             help='specify a configuration file')
     return parser
 
+def global_options_to_args(options):
+    option_map = {
+        'config_file': '--config-file',
+        'virtstrap_dir': '--virtstrap-dir',
+        'project_dir': '--project-dir',
+        'profiles': '--profiles',
+        'verbosity': '--verbosity',
+        'log_file': '--log',
+    }
+    args = []
+    for option_var, option_flag in option_map.iteritems():
+        value = getattr(options, option_var, None)
+        if not value:
+            continue
+        args.append('%s=%s' % (option_flag, value))
+    return args
+
 def parser_from_commands(commands):
     """Creates a parser from all the passed in commands
 
