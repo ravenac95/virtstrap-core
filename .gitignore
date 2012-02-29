@@ -20,13 +20,15 @@
 # log files and databases
 sqlite.db
 *.log
-.DS_Store?
-.DS_Store
 ehthumbs.db
 Icon?
 Thumbs.db
 *.db
 *.db.*
+
+# Mac Related
+.DS_Store?
+.DS_Store
 
 # vim files
 .*.sw*
@@ -43,6 +45,7 @@ downloads
 eggs
 parts
 dist
+
 #virtstrap
 quickactivate.sh
 vs.env
@@ -51,9 +54,6 @@ vs.env
 # Misc
 *.bak
 *.tmp
-plustronic/products/management/commands/Images
-uploads
-devspecific.py
 
-# Sass
-.sass-cache
+# Sphinx
+docs/_build

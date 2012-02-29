@@ -1,32 +1,39 @@
 """
-VirtStrap
-=========
+virtstrap-core
+==============
 
 A bootstrapping mechanism for virtualenv, buildout, and shell scripts.
 """
+import sys
+import os
 from setuptools import setup, find_packages
 
+VERSION = "0.3.0"
+
+# Installation requirements
+REQUIREMENTS = [
+    'jinja2',
+    'simpleyaml',
+]
+
+if sys.version_info < (2, 7):
+    REQUIREMENTS.append('argparse>=1.2.1')
+
 setup(
-    name="VirtStrap",
-    version="0.2.3",
+    name="virtstrap-core",
+    version=VERSION,
     license="MIT",
     author="Reuven V. Gonzales",
-    url="https://github.com/ravenac95/virtstrap",
+    url="https://github.com/ravenac95/virtstrap-core",
     author_email="reuven@tobetter.us",
     description="A bootstrapping mechanism for virtualenv+pip and shell scripts",
+    long_description="virtstrap-core is not meant to be installed manually",
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
     platforms='*nix',
-    install_requires=[
-        "PasteScript>=1.3",
-        "virtualenv",
-    ],
-    entry_points="""
-        [paste.paster_create_template]
-        virtstrap_basic = virtstrap.entry.template:VirtStrapBasicTemplate
-        virtstrap_ipython = virtstrap.entry.template:VirtStrapIPythonTemplate
-    """,
+    install_requires=REQUIREMENTS,
+    entry_points={},
     classifiers = [
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
