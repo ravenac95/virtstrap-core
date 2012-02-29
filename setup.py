@@ -1,6 +1,6 @@
 """
-Virtstrap
-=========
+virtstrap-core
+==============
 
 A bootstrapping mechanism for virtualenv, buildout, and shell scripts.
 """
@@ -8,7 +8,7 @@ import sys
 import os
 from setuptools import setup, find_packages
 
-VERSION = "0.3.0-alpha"
+VERSION = "0.3.0"
 
 # Installation requirements
 REQUIREMENTS = [
@@ -24,9 +24,10 @@ setup(
     version=VERSION,
     license="MIT",
     author="Reuven V. Gonzales",
-    url="https://github.com/ravenac95/virtstrap",
+    url="https://github.com/ravenac95/virtstrap-core",
     author_email="reuven@tobetter.us",
     description="A bootstrapping mechanism for virtualenv+pip and shell scripts",
+    long_description="virtstrap-core is not meant to be installed manually",
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
