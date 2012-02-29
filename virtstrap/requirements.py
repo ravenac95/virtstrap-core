@@ -36,6 +36,10 @@ class RequirementSet(object):
     def __len__(self):
         return len(self._requirements)
 
+    def __iter__(self):
+        """Return requirements iterator"""
+        return iter(self._requirements)
+
 def process_raw_requirements(raw_data):
     processor = RequirementsProcessor()
     return processor.to_requirements(raw_data)
@@ -47,6 +51,13 @@ class Requirement(object):
 
     def to_pip_str(self):
         return '%s%s' % (self._name, self._version)
+
+    @property
+    def name(self):
+        return self._name
+
+    def __repr__(self):
+        return 'Requirement(%s)' % self.to_pip_str()
 
 class URLRequirement(Requirement):
     def __init__(self, name, url):

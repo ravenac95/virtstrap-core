@@ -58,6 +58,24 @@ class TestRequirementSet(object):
         req_set = RequirementSet.from_config_data(None)
         assert not req_set
 
+    def test_iterate_requirements_set(self):
+        requirements_list = [
+            'ipython',
+            {'werkzeug': '==0.8'},
+            {'requests': '>=0.8'},
+            {'jinja2': [
+                'git+https://something.com/mitsuhiko/jinja2.git',
+                {'editable': True},
+            ]},
+        ]
+        expected_names = ['ipython', 'werkzeug', 'requests', 'jinja2']
+        req_set = RequirementSet.from_config_data(requirements_list)
+        looped = False
+        for requirement in req_set:
+            looped = True
+            assert requirement.name in expected_names
+        assert looped, 'RequirementSet did not iterate at all'
+
 class TestRequirementsProcessor(object):
     def setup(self):
         # RequirementsProcessor uses a dictionary of
