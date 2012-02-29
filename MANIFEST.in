@@ -1,2 +1,2 @@
 include LICENSE
-recursive-include virtstrap/paster-templates *
+recursive-include virtstrap/templates *
