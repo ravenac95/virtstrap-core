@@ -1,3 +1,7 @@
+"""
+Test project
+------------
+"""
 import fudge
 from fudge.inspector import arg
 from fudge.patcher import patch_object
