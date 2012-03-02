@@ -36,6 +36,8 @@ class Command(object):
         return_code = 0
         try:
             self.run(options, **kwargs)
+        except SystemExit, e:
+            return_code = e.code
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
@@ -104,6 +106,8 @@ class ProjectCommand(Command, ProjectMixin):
         return_code = 0
         try:
             self.run(project, options, **kwargs)
+        except SystemExit, e:
+            return_code = e.code
         except:
             self.logger.exception('An error occured executing command "%s"' %
                     self.__class__.__name__)
