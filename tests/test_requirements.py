@@ -5,16 +5,6 @@ from nose.tools import raises
 from virtstrap.exceptions import RequirementsConfigError
 from virtstrap.requirements import *
 
-TEST_REQUIREMENTS_YML = """
-requirements:
-  - ipython
-  - jinja2:
-    - https://github.com/mitsuhiko/jinja2.git
-    - editable: true
-  - werkzeug: '==0.8'
-  - requests: '>=0.8'
-"""
-
 def test_initialize_processor():
     req_set = RequirementSet()
 
