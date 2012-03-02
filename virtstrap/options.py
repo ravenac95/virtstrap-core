@@ -20,8 +20,14 @@ try:
 except pkg_resources.DistributionNotFound:
     version=None
 
+class CLIList(list):
+    """Special list type that is used for command line interface lists"""
+    def __str__(self):
+        self_as_strings = map(lambda a: str(a), self)
+        return ','.join(self_as_strings)
+
 def list_str(string):
-    return map(lambda a: a.strip(), string.split(','))
+    return CLIList(map(lambda a: a.strip(), string.split(',')))
 
 def create_base_parser():
     global_parser = create_global_parser()
@@ -72,16 +78,20 @@ def create_project_parser():
     return parser
 
 def global_options_to_args(options):
-    option_map = {
-        'config_file': '--config-file',
-        'virtstrap_dir': '--virtstrap-dir',
-        'project_dir': '--project-dir',
-        'profiles': '--profiles',
-        'verbosity': '--verbosity',
-        'log_file': '--log',
-    }
+    # FIXME Rename uses of this function
+    return base_options_to_args(options)
+
+def base_options_to_args(options):
+    option_map = ( 
+        ('config_file', '--config-file'),
+        ('log_file', '--log'),
+        ('profiles', '--profiles'),
+        ('project_dir', '--project-dir'),
+        ('verbosity', '--verbosity'),
+        ('virtstrap_dir', '--virtstrap-dir'),
+    )
     args = []
-    for option_var, option_flag in option_map.iteritems():
+    for option_var, option_flag in option_map:
         value = getattr(options, option_var, None)
         if not value:
             continue
